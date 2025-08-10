@@ -79,6 +79,40 @@
         ]
       }
     },
+    "Dance Dance Revolution A3 Gold Cab mode": {
+      "process": ["spice.exe", "spice64.exe"],
+      "title": "Dance Dance Revolution",
+      "shortname": "DDRA3Gold",
+      "states": {
+        "Select": [
+          [ [912, 186, 239, 203, 74] ]
+        ],
+        "Playing": [
+          [ [639, 66, 224, 196, 31] ]
+        ],
+        "Result": [
+          [ [90, 106, 239, 215, 49], [696, 336, 8, 146, 222] ],
+          [ [1209, 106, 239, 215, 49], [696, 336, 8, 146, 222] ]
+        ]
+      }
+    },
+    "Dance Dance Revolution WORLD": {
+      "process": ["spice.exe", "spice64.exe"],
+      "title": "Dance Dance Revolution",
+      "shortname": "DDRWORLD",
+      "states": {
+        "Select": [
+          [ [1017, 19, 239, 215, 49], [358, 364, 39, 40, 40] ],
+          [ [1017, 19, 239, 215, 49], [1256, 364, 39, 40, 40] ]
+        ],
+        "Playing": [
+          [ [681, 10, 67, 63, 63] ]
+        ],
+        "Result": [
+          [ [338, 463, 0, 255, 186], [742, 360, 114, 114, 114] ]
+        ]
+      }
+    },
     "Sound Voltex: Exceed Gear": {
       "process": ["spice64.exe"],
       "title": "SOUND VOLTEX EXCEED GEAR - Main Screen",
