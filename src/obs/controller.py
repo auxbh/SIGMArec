@@ -43,6 +43,7 @@ class OBSController:
 
     _keep_alive_thread: Optional[threading.Thread] = None
     _keep_alive_stop_event: Optional[threading.Event] = None
+    _connection_lost: bool = False
 
     _prev_recording_active: bool = False
     recording_active: bool = False
@@ -51,8 +52,12 @@ class OBSController:
 
     @property
     def is_connected(self) -> bool:
-        """Check if we have active OBS clients."""
-        return self.req_client is not None and self.event_client is not None
+        """Check if we have active OBS clients and connection is not lost."""
+        return (
+            self.req_client is not None
+            and self.event_client is not None
+            and not self._connection_lost
+        )
 
     @classmethod
     def connect(cls, settings: AppSettings) -> "OBSController":
@@ -63,6 +68,7 @@ class OBSController:
             event_client=None,
             config=settings,
             recording_active=False,
+            _connection_lost=False,
         )
 
         success = instance._attempt_connection()
@@ -77,32 +83,39 @@ class OBSController:
 
     def _attempt_connection(self) -> bool:
         """Attempt to establish connection to OBS. Returns True if successful."""
-        with _suppress_obsws_logging():
-            req_client = obsws.ReqClient(
-                host=self.config.obs_host,
-                port=self.config.obs_port,
-                password=self.config.obs_password,
-                timeout=self.config.obs_timeout,
-            )
+        try:
+            with _suppress_obsws_logging():
+                req_client = obsws.ReqClient(
+                    host=self.config.obs_host,
+                    port=self.config.obs_port,
+                    password=self.config.obs_password,
+                    timeout=self.config.obs_timeout,
+                )
 
-            event_client = obsws.EventClient(
-                host=self.config.obs_host,
-                port=self.config.obs_port,
-                password=self.config.obs_password,
-                timeout=self.config.obs_timeout,
-            )
+                event_client = obsws.EventClient(
+                    host=self.config.obs_host,
+                    port=self.config.obs_port,
+                    password=self.config.obs_password,
+                    timeout=self.config.obs_timeout,
+                )
 
-            req_client.get_version()
+                # Test the connection
+                req_client.get_version()
+                resp = req_client.get_record_status()
 
-            resp = req_client.get_record_status()
+            self.req_client = req_client
+            self.event_client = event_client
+            self.recording_active = resp.output_active
+            self._connection_lost = False
 
-        self.req_client = req_client
-        self.event_client = event_client
-        self.recording_active = resp.output_active
+            self.register_events()
 
-        self.register_events()
+            return True
 
-        return True
+        except Exception as e:
+            logging.debug("[OBS] Connection attempt failed: %s", str(e))
+            self._connection_lost = True
+            return False
 
     def _start_keep_alive_thread(self):
         """Start the background keep-alive monitoring thread."""
@@ -121,20 +134,30 @@ class OBSController:
     def _continuous_keep_alive(self):
         """Continuously monitor connection and reconnect if needed."""
         while not self._keep_alive_stop_event.is_set():
-            if not self.is_connected:
-                self._reconnect()
-            else:
-                with _suppress_obsws_logging():
-                    self.req_client.get_version()
-            self._keep_alive_stop_event.wait(self.config.obs_timeout)
+            try:
+                if not self.is_connected:
+                    self._reconnect()
+                else:
+                    # Test connection with a simple API call
+                    with _suppress_obsws_logging():
+                        self.req_client.get_version()
+
+                # Wait before next check
+                self._keep_alive_stop_event.wait(self.config.obs_timeout)
+
+            except Exception as e:
+                logging.debug("[OBS] Keep-alive check failed: %s", str(e))
+                self._connection_lost = True
+                # Wait a bit before trying to reconnect
+                self._keep_alive_stop_event.wait(1)
 
     def _reconnect(self):
         """Attempt to reconnect to OBS WebSocket."""
-        logging.info("[OBS] Awaiting connection...")
+        logging.info("[OBS] Attempting to reconnect...")
 
         while not self._keep_alive_stop_event.is_set():
             if self._attempt_connection():
-                logging.info("[OBS] Connected")
+                logging.info("[OBS] Reconnected successfully")
                 return
             self._keep_alive_stop_event.wait(1)
 
@@ -155,7 +178,11 @@ class OBSController:
     def register_events(self):
         """Register event callbacks."""
         if self.is_connected:
-            self.event_client.callback.register(self.on_record_state_changed)
+            try:
+                self.event_client.callback.register(self.on_record_state_changed)
+            except Exception as e:
+                logging.debug("[OBS] Failed to register events: %s", str(e))
+                self._connection_lost = True
 
     def on_record_state_changed(self, event):
         """Callback for when the recording state changes."""
@@ -175,13 +202,21 @@ class OBSController:
     def start_recording(self):
         """Start recording."""
         if not self.recording_active and self.is_connected:
-            with _suppress_obsws_logging():
-                self.req_client.start_record()
+            try:
+                with _suppress_obsws_logging():
+                    self.req_client.start_record()
+            except Exception as e:
+                logging.debug("[OBS] Failed to start recording: %s", str(e))
+                self._connection_lost = True
 
     def stop_recording(self):
         """Stop recording."""
         if self.recording_active and self.is_connected:
-            self.req_client.stop_record()
+            try:
+                self.req_client.stop_record()
+            except Exception as e:
+                logging.debug("[OBS] Failed to stop recording: %s", str(e))
+                self._connection_lost = True
 
     def set_video_settings(
         self,
@@ -205,46 +240,51 @@ class OBSController:
             logging.debug("[OBS] Cannot set video settings - not connected")
             return
 
-        with _suppress_obsws_logging():
-            # Get current video settings first to preserve other settings
-            current_settings = self.req_client.get_video_settings()
+        try:
+            with _suppress_obsws_logging():
+                # Get current video settings first to preserve other settings
+                current_settings = self.req_client.get_video_settings()
 
-            # Determine FPS values to use
+                # Determine FPS values to use
+                if fps is not None:
+                    # Convert fps to numerator/denominator (assuming denominator = 1 for simplicity)
+                    fps_numerator = int(fps)
+                    fps_denominator = 1
+                else:
+                    # Preserve current FPS
+                    fps_numerator = current_settings.fps_numerator
+                    fps_denominator = current_settings.fps_denominator
+
+                # Update video settings
+                self.req_client.set_video_settings(
+                    base_width=base_width,
+                    base_height=base_height,
+                    out_width=output_width,
+                    out_height=output_height,
+                    numerator=fps_numerator,
+                    denominator=fps_denominator,
+                )
+
             if fps is not None:
-                # Convert fps to numerator/denominator (assuming denominator = 1 for simplicity)
-                fps_numerator = int(fps)
-                fps_denominator = 1
+                logging.info(
+                    "[OBS][Video] Settings updated: Base %dx%d, Output %dx%d, FPS %s",
+                    base_width,
+                    base_height,
+                    output_width,
+                    output_height,
+                    fps,
+                )
             else:
-                # Preserve current FPS
-                fps_numerator = current_settings.fps_numerator
-                fps_denominator = current_settings.fps_denominator
-
-            # Update video settings
-            self.req_client.set_video_settings(
-                base_width=base_width,
-                base_height=base_height,
-                out_width=output_width,
-                out_height=output_height,
-                numerator=fps_numerator,
-                denominator=fps_denominator,
-            )
-        if fps is not None:
-            logging.info(
-                "[OBS][Video] Settings updated: Base %dx%d, Output %dx%d, FPS %s",
-                base_width,
-                base_height,
-                output_width,
-                output_height,
-                fps,
-            )
-        else:
-            logging.info(
-                "[OBS][Video] Settings updated: Base %dx%d, Output %dx%d",
-                base_width,
-                base_height,
-                output_width,
-                output_height,
-            )
+                logging.info(
+                    "[OBS][Video] Settings updated: Base %dx%d, Output %dx%d",
+                    base_width,
+                    base_height,
+                    output_width,
+                    output_height,
+                )
+        except Exception as e:
+            logging.debug("[OBS] Failed to set video settings: %s", str(e))
+            self._connection_lost = True
 
     def get_video_settings(self) -> Optional[dict]:
         """
@@ -256,16 +296,21 @@ class OBSController:
         if not self.is_connected:
             return None
 
-        with _suppress_obsws_logging():
-            response = self.req_client.get_video_settings()
-        return {
-            "base_width": response.base_width,
-            "base_height": response.base_height,
-            "output_width": response.output_width,
-            "output_height": response.output_height,
-            "fps_numerator": response.fps_numerator,
-            "fps_denominator": response.fps_denominator,
-        }
+        try:
+            with _suppress_obsws_logging():
+                response = self.req_client.get_video_settings()
+            return {
+                "base_width": response.base_width,
+                "base_height": response.base_height,
+                "output_width": response.output_width,
+                "output_height": response.output_height,
+                "fps_numerator": response.fps_numerator,
+                "fps_denominator": response.fps_denominator,
+            }
+        except Exception as e:
+            logging.debug("[OBS] Failed to get video settings: %s", str(e))
+            self._connection_lost = True
+            return None
 
     def set_current_scene(self, scene_name: str):
         """
@@ -280,9 +325,15 @@ class OBSController:
             )
             return
 
-        with _suppress_obsws_logging():
-            self.req_client.set_current_program_scene(scene_name)
-        logging.debug("[OBS] Switched to scene: %s", scene_name)
+        try:
+            with _suppress_obsws_logging():
+                self.req_client.set_current_program_scene(scene_name)
+            logging.debug("[OBS] Switched to scene: %s", scene_name)
+        except Exception as e:
+            logging.debug(
+                "[OBS] Failed to switch to scene '%s': %s", scene_name, str(e)
+            )
+            self._connection_lost = True
 
     def get_current_scene(self) -> Optional[str]:
         """
@@ -294,9 +345,14 @@ class OBSController:
         if not self.is_connected:
             return None
 
-        with _suppress_obsws_logging():
-            response = self.req_client.get_current_program_scene()
-        return response.current_program_scene_name
+        try:
+            with _suppress_obsws_logging():
+                response = self.req_client.get_current_program_scene()
+            return response.current_program_scene_name
+        except Exception as e:
+            logging.debug("[OBS] Failed to get current scene: %s", str(e))
+            self._connection_lost = True
+            return None
 
     def get_scene_list(self) -> List[str]:
         """
@@ -308,6 +364,11 @@ class OBSController:
         if not self.is_connected:
             return []
 
-        with _suppress_obsws_logging():
-            response = self.req_client.get_scene_list()
-        return [scene["sceneName"] for scene in response.scenes]
+        try:
+            with _suppress_obsws_logging():
+                response = self.req_client.get_scene_list()
+            return [scene["sceneName"] for scene in response.scenes]
+        except Exception as e:
+            logging.debug("[OBS] Failed to get scene list: %s", str(e))
+            self._connection_lost = True
+            return []
