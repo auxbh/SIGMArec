@@ -67,7 +67,6 @@ class DetectionEngine:
         self._delete_next_recording: bool = False
         self._restart_after_stop: bool = False
 
-        # Transition patterns
         self.state.machine.add_patterns(
             [
                 TransitionPattern("start_play", ("Select", "Playing")),
@@ -84,7 +83,6 @@ class DetectionEngine:
 
         logging.info("[Detection] Engine ready with %s games", len(self.games))
 
-    # Public API
     def detect_and_control(self) -> Dict[str, Any]:
         """Detect the current game state and control the recording process."""
         now = time.time()
@@ -99,7 +97,6 @@ class DetectionEngine:
 
         detected = self._detect_state_for(game)
 
-        # Special case: check for recent playing patterns when already in playing state
         if (
             self.state.current_state == "Playing"
             and isinstance(game, LogGame)
@@ -109,12 +106,9 @@ class DetectionEngine:
             logging.info(
                 "[Detection] Quick restart detected - stopping current recording"
             )
-            # Stop the current recording and mark it for deletion
-            # The new recording will be started when the old one completes
             self._delete_next_recording = True
-            self._restart_after_stop = True  # Flag to start new recording after stop
+            self._restart_after_stop = True
             self._stop_recording(immediate=True)
-            # Update the playing timestamp to reflect the new session
             self._update_playing_timestamp()
             return {
                 "game": self.state.current_game.name
@@ -186,19 +180,16 @@ class DetectionEngine:
             "focused_window": self.screen.get_focused_window_title(),
         }
 
-    # Detection
     def _active_game(self) -> Optional[Game]:
         title = self.screen.get_focused_window_title()
         if not title:
             return None
 
-        # Try log-based games first when a Java window is foreground
         if self._foreground_is_java():
             for g in self.games:
                 if isinstance(g, LogGame) and self._matches_focused(g, title):
                     return g
 
-        # Then pixel-based games
         for g in self.games:
             if isinstance(g, PixelGame) and self._matches_focused(g, title):
                 return g
@@ -241,11 +232,9 @@ class DetectionEngine:
             return state_obj.get_name() if state_obj else None
         return None
 
-    # State confirmation and control
     def _update_detection_counters(self, detected: Optional[str]) -> None:
         if detected != self.state.last_seen_detection:
             self.state.last_seen_detection = detected
-            # Pixel games: consider None as Unknown for streak counting
             if detected is None and isinstance(self.state.current_game, PixelGame):
                 self.state.consecutive_detections = 1
             elif detected is None:
@@ -260,7 +249,6 @@ class DetectionEngine:
         if self.state.consecutive_detections < self.settings.detections_required:
             return
 
-        # Pixel games: convert repeated None to confirmed Unknown
         if detected is None and isinstance(self.state.current_game, PixelGame):
             if self.state.current_state != "Unknown":
                 self._confirm_state("Unknown")
@@ -299,11 +287,9 @@ class DetectionEngine:
         else:
             logging.info("[Detection] [%s] %s", game_name, curr)
 
-        # Handle scene switching when state changes
         if curr and prev != curr:
             self._handle_scene_switching(curr)
 
-        # Update Playing timestamp for LogGame
         if curr == "Playing" and isinstance(self.state.current_game, LogGame):
             self._update_playing_timestamp()
 
@@ -334,7 +320,6 @@ class DetectionEngine:
             self._stop_recording(immediate=False)
             return
 
-    # Recording controls
     def _start_recording(self, playsound: bool = True) -> None:
         logging.info("[Detection] Start recording")
         if playsound:
@@ -370,10 +355,8 @@ class DetectionEngine:
             return
         logging.info("[Detection] No active game window")
 
-        # Switch to default scene if configured
         default_scene = self.settings.get_scene_name("", "Default")
         if default_scene:
-            logging.info("[Detection] Switching to default scene '%s'", default_scene)
             self.obs.set_current_scene(default_scene)
 
         self.state.current_game = None
@@ -385,11 +368,9 @@ class DetectionEngine:
         self.state.last_playing_timestamp = None
         self._restart_after_stop = False
         if self.state.recording_active:
-            # Losing focus discards the take
             self._delete_next_recording = True
             self._stop_recording(immediate=True)
 
-    # LogGame timestamp handling helpers
     def _should_restart_for_timestamp_change(self) -> bool:
         """
         Check if a Playing to Playing transition should trigger a restart
@@ -398,7 +379,6 @@ class DetectionEngine:
         if not isinstance(self.state.current_game, LogGame):
             return False
 
-        # Get the current Playing timestamp from log entries
         entries = self.logs.get_log_entries_for_game(
             self.state.current_game.name, self.state.current_game.logs
         )
@@ -409,11 +389,9 @@ class DetectionEngine:
         if not current_timestamp:
             return False
 
-        # Compare with stored timestamp
         if self.state.last_playing_timestamp is None:
             return False
 
-        # If timestamps are different, this is a new Playing session
         return current_timestamp != self.state.last_playing_timestamp
 
     def _update_playing_timestamp(self) -> None:
@@ -443,7 +421,6 @@ class DetectionEngine:
         if not playing_state:
             return False
 
-        # Use the last playing timestamp as the cutoff
         return self.logs.has_recent_playing_pattern(
             self.state.current_game.name,
             self.state.current_game.logs,
@@ -451,7 +428,6 @@ class DetectionEngine:
             self.state.last_playing_timestamp,
         )
 
-    # Recording completion helpers
     def _delete_recording(self, output_path: str) -> None:
         if os.path.exists(output_path):
             os.remove(output_path)
@@ -472,32 +448,7 @@ class DetectionEngine:
         if not self.state.current_game:
             return
 
-        # Get the game shortname for scene configuration lookup
         game_shortname = self.state.current_game.shortname
-
-        # Try to find a scene for this game and state
         scene_name = self.settings.get_scene_name(game_shortname, state)
-
         if scene_name:
-            logging.info(
-                "[Detection] Switching to scene '%s' for %s/%s",
-                scene_name,
-                game_shortname,
-                state,
-            )
             self.obs.set_current_scene(scene_name)
-        else:
-            # Add debug logging to help diagnose scene configuration issues
-            logging.debug(
-                "[Detection] No scene configured for %s/%s. Available scenes: %s",
-                game_shortname,
-                state,
-                self.settings.scenes,
-            )
-            # Also log at info level for important states like Result
-            if state in ["Result", "Select"]:
-                logging.info(
-                    "[Detection] No scene configured for %s/%s - check config.toml scenes section",
-                    game_shortname,
-                    state,
-                )

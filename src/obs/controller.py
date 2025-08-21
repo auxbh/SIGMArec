@@ -326,9 +326,11 @@ class OBSController:
             return
 
         try:
-            with _suppress_obsws_logging():
-                self.req_client.set_current_program_scene(scene_name)
-            logging.debug("[OBS] Switched to scene: %s", scene_name)
+            current_scene = self.get_current_scene()
+            if current_scene != scene_name:
+                with _suppress_obsws_logging():
+                    self.req_client.set_current_program_scene(scene_name)
+                logging.info("[OBS][Scene] '%s' → '%s'", current_scene, scene_name)
         except Exception as e:
             logging.debug(
                 "[OBS] Failed to switch to scene '%s': %s", scene_name, str(e)
