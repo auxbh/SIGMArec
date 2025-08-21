@@ -1,0 +1,7 @@
+keyboard
+mss
+obsws-python
+psutil
+pywin32
+toml
+wmi
