@@ -1,0 +1,257 @@
+"""
+Recording manager for handling file operations and organization.
+
+This module handles the recording file management including lastplay system,
+organizing into folders, and thumbnail creation.
+"""
+
+import logging
+import shutil
+from datetime import datetime
+from pathlib import Path
+from typing import Optional, Tuple
+
+import mss.tools
+
+from config.settings import AppSettings
+from detection.screen_capture import ScreenCaptureService
+from games.objects import Game
+
+
+class Recording:
+    """Manages recording file operations and organization."""
+
+    def __init__(self, settings: AppSettings, obs_recording_dir: Optional[str] = None):
+        """
+        Initialize the recording manager.
+
+        Args:
+            settings: Application settings
+            obs_recording_dir: Directory where OBS saves recordings (optional)
+        """
+        self.settings = settings
+        self.obs_recording_dir = Path(obs_recording_dir) if obs_recording_dir else None
+        self._current_lastplay_path: Optional[Path] = None
+        self._current_thumbnail_path: Optional[Path] = None
+
+        logging.debug("[Recording] Manager initialized")
+
+    def handle_recording_stopped(self, output_path: str) -> str:
+        """
+        Handle a recording that just stopped by renaming it to lastplay.
+
+        Args:
+            output_path: Original path of the recorded file
+            game: Game object if detection was active
+
+        Returns:
+            Path to the lastplay file
+        """
+        original_path = Path(output_path)
+
+        if not original_path.exists():
+            logging.warning("[Recording] Recording file not found: %s", output_path)
+            return output_path
+
+        recording_dir = original_path.parent
+
+        extension = original_path.suffix
+        lastplay_path = recording_dir / f"lastplay{extension}"
+
+        if lastplay_path.exists():
+            lastplay_path.unlink()
+            logging.debug("[Recording] Removed previous lastplay file")
+
+        shutil.move(str(original_path), str(lastplay_path))
+        self._current_lastplay_path = lastplay_path
+
+        if self.settings.save_thumbnails:
+            self._create_lastplay_thumbnail(lastplay_path)
+
+        logging.info(
+            "[Recording] Recording renamed to lastplay: %s",
+            lastplay_path.name,
+        )
+
+        return str(lastplay_path)
+
+    def save_lastplay(self, game: Optional[Game] = None) -> Tuple[bool, str]:
+        """
+        Save the current lastplay file with proper organization.
+
+        Args:
+            game: Game object for organization
+
+        Returns:
+            Tuple of (success, message)
+        """
+        if not self.has_lastplay():
+            return False, "No lastplay file available"
+
+        if not game:
+            return False, "No game context available"
+
+        lastplay_path = self._current_lastplay_path
+
+        new_filename = self._generate_filename(lastplay_path, game)
+
+        target_dir = self._get_organized_directory(game)
+        target_dir.mkdir(parents=True, exist_ok=True)
+
+        final_path = target_dir / new_filename
+
+        shutil.move(str(lastplay_path), str(final_path))
+
+        if self._current_thumbnail_path and self._current_thumbnail_path.exists():
+            self._organize_thumbnail(final_path)
+
+        logging.info("[Recording] Lastplay saved: %s", final_path)
+
+        return True, f"Saved as {new_filename} in {target_dir.name}/"
+
+    def has_lastplay(self) -> bool:
+        """
+        Check if a lastplay file exists.
+
+        Returns:
+            True if lastplay file exists and is accessible
+        """
+        return (
+            self._current_lastplay_path is not None
+            and self._current_lastplay_path.exists()
+        )
+
+    def get_lastplay_info(self) -> Optional[dict]:
+        """
+        Get information about the current lastplay file.
+
+        Returns:
+            Dictionary with lastplay info or None if no lastplay
+        """
+        if not self.has_lastplay():
+            return None
+
+        path = self._current_lastplay_path
+        stat = path.stat()
+
+        return {
+            "path": str(path),
+            "name": path.name,
+            "size_mb": round(stat.st_size / (1024 * 1024), 2),
+            "created": datetime.fromtimestamp(stat.st_ctime).strftime(
+                "%Y-%m-%d %H:%M:%S"
+            ),
+        }
+
+    def _generate_filename(
+        self, original_path: Path, game: Optional[Game] = None
+    ) -> str:
+        """
+        Generate a new filename for the recording.
+
+        Args:
+            original_path: Original file path
+            game: Game object if available
+
+        Returns:
+            New filename in format: SHORTNAME_YYYY-MM-DD_HH-mm-ss.ext
+        """
+        now = datetime.now()
+        timestamp = now.strftime("%Y-%m-%d_%H-%M-%S")
+
+        if game and hasattr(game, "shortname"):
+            prefix = game.shortname
+        else:
+            prefix = "RECORDING"
+
+        extension = original_path.suffix
+
+        return f"{prefix}_{timestamp}{extension}"
+
+    def _get_organized_directory(self, game: Optional[Game] = None) -> Path:
+        """
+        Get the target directory for organizing saved recordings.
+        Creates game folders in the same directory as lastplay (OBS recording directory).
+
+        Args:
+            game: Game object if available
+
+        Returns:
+            Path object for the target directory
+        """
+        if self._current_lastplay_path:
+            base_dir = self._current_lastplay_path.parent
+        elif self.obs_recording_dir and self.obs_recording_dir.exists():
+            base_dir = self.obs_recording_dir
+        else:
+            base_dir = Path(".")
+
+        if game and hasattr(game, "shortname"):
+            return base_dir / game.shortname
+
+        return base_dir / "Unknown"
+
+    def _sanitize_filename(self, filename: str) -> str:
+        """
+        Sanitize a string for use as a filename or directory name.
+
+        Args:
+            filename: String to sanitize
+
+        Returns:
+            Sanitized string safe for filesystem use
+        """
+        invalid_chars = '<>:"/\\|?*'
+        for char in invalid_chars:
+            filename = filename.replace(char, "_")
+
+        filename = filename.strip(" .")
+
+        if len(filename) > 100:
+            filename = filename[:100]
+
+        return filename
+
+    def _create_lastplay_thumbnail(self, video_path: Path) -> None:
+        """
+        Create a thumbnail for the lastplay video using current screen capture.
+
+        Args:
+            video_path: Path to the lastplay video file
+        """
+        screen_capture = ScreenCaptureService()
+
+        screenshot = screen_capture.capture_focused_window()
+
+        recording_dir = video_path.parent
+        thumbnail_path = recording_dir / "lastplay.png"
+
+        if thumbnail_path.exists():
+            thumbnail_path.unlink()
+            logging.debug("[Recording] Removed previous thumbnail")
+
+        mss.tools.to_png(screenshot.rgb, screenshot.size, output=str(thumbnail_path))
+
+        self._current_thumbnail_path = thumbnail_path
+
+        logging.debug("[Recording] Created thumbnail: %s", thumbnail_path.name)
+
+    def _organize_thumbnail(self, video_path: Path) -> None:
+        """
+        Copy and rename the thumbnail to match the organized video file.
+
+        Args:
+            video_path: Path to the organized video file
+        """
+        if (
+            not self._current_thumbnail_path
+            or not self._current_thumbnail_path.exists()
+        ):
+            return
+
+        thumbnail_name = video_path.stem + ".png"
+        organized_thumbnail_path = video_path.parent / thumbnail_name
+
+        shutil.move(str(self._current_thumbnail_path), str(organized_thumbnail_path))
+
+        logging.debug("[Recording] Organized thumbnail: %s", thumbnail_name)
