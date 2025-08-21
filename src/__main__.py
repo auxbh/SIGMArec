@@ -11,12 +11,11 @@ import time
 
 import keyboard
 
+from __init__ import __version__
 from config.settings import AppSettings, ConfigManager
 from detection.engine import DetectionEngine
 from games.repository import GameRepository
 from obs.controller import OBSController
-
-from .__init__ import __version__
 
 
 class SIGMArecApp:
