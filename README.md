@@ -49,7 +49,7 @@ For IIDX, default frame skin must be used.
 - **beatoraja**
 - **LR2oraja**
 
-## Build from source
+## 🔨 Build from source
 
 ### Requirements
 
