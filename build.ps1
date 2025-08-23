@@ -10,8 +10,8 @@ New-Item -ItemType Directory -Path "release" -Force
 py -m pip install -r requirements.txt
 py -m PyInstaller --onefile --name="SIGMArec" --icon="./assets/SIGMArec.ico" --dist=./release/ --paths=src src/__main__.py --uac-admin
 
-# Copy all assets except .ico and config.toml=
-Copy-Item "assets/*" "release/" -Recurse -Exclude "*.ico", "config.toml"
+# Copy all assets except .ico
+Copy-Item "assets/*" "release/" -Recurse -Exclude "*.ico"
 
 # Include README.md
 Copy-Item "README.md" "release/"
