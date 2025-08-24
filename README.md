@@ -20,7 +20,11 @@ SIGMArec is an automated recording tool for rhythm games that intelligently dete
 2. **Extract** the ZIP file to your desired folder
 3. **Copy** `example.config.toml` to `config.toml`
 4. **Edit** `config.toml` with your OBS settings (see Configuration section)
-5. **Run** `SIGMArec.exe`
+5. **Start** OBS with WebSocket enabled
+6. **Run** `SIGMArec.exe`
+
+Then **play** any supported game. SIGMArec should now record your gameplay.  
+**Press** your defined `save_key` after hearing the `ready` sound on result screen to save your last play.
 
 ## ⚙️ Configuration
 
