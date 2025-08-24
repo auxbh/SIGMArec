@@ -14,11 +14,12 @@ from typing import Optional, Tuple
 import mss.tools
 
 from config.settings import AppSettings
+from core.interfaces.recording import IRecordingManager
 from detection.screen_capture import ScreenCaptureService
 from games.objects import Game
 
 
-class Recording:
+class RecordingManager(IRecordingManager):
     """Manages recording file operations and organization."""
 
     def __init__(self, settings: AppSettings, obs_recording_dir: Optional[str] = None):
@@ -35,6 +36,19 @@ class Recording:
         self._current_thumbnail_path: Optional[Path] = None
 
         logging.debug("[Recording] Manager initialized")
+
+    def handle_recording_completed(self, output_path: str) -> None:
+        """
+        Handle a completed recording.
+
+        Args:
+            output_path: Path to the completed recording file
+        """
+        try:
+            self.handle_recording_stopped(output_path)
+            logging.debug("[Recording] Recording completed: %s", output_path)
+        except Exception as e:
+            logging.error("[Recording] Error handling recording completion: %s", e)
 
     def handle_recording_stopped(self, output_path: str) -> str:
         """

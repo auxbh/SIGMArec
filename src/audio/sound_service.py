@@ -1,8 +1,5 @@
 """
-Sound service for playing audio feedback during recording operations.
-
-This module handles playing sound files using Windows built-in capabilities
-to avoid adding extra dependencies.
+Sound service for playing audio feedback using winsound.
 """
 
 import logging
@@ -10,11 +7,11 @@ import os
 import winsound
 from pathlib import Path
 
-from config import AppSettings
+from config.settings import AppSettings
 
 
 class SoundService:
-    """Service for playing audio feedback sounds using Windows built-in capabilities."""
+    """Service for playing audio feedback sounds using winsound."""
 
     def __init__(self, settings: AppSettings):
         """
@@ -74,7 +71,7 @@ class SoundService:
             logging.warning("[SoundService] Sound file not found: %s", full_path)
 
     def play_sound(self, sound_name: str):
-        """Play a sound by name."""
+        """Play a sound by name (start, ready, saved, failed)."""
         if sound_name not in self._sound_paths:
             logging.debug("[SoundService] Sound %s not available", sound_name)
             return
@@ -97,7 +94,3 @@ class SoundService:
     def play_failed(self):
         """Play save failure sound."""
         self.play_sound("failed")
-
-    def cleanup(self):
-        """Clean up sound resources (no-op for this implementation)."""
-        logging.debug("[SoundService] Sound service cleaned up")

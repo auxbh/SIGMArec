@@ -9,7 +9,7 @@ import json
 from pathlib import Path
 from typing import Any, Dict, List
 
-from games.objects.types import GameType
+from .objects import GameType
 
 
 class GameDataError(Exception):

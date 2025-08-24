@@ -1,9 +1,7 @@
 """
 Audio module for SIGMArec.
-
-Provides audio playback services.
 """
 
-from .sound import SoundService
+from .sound_service import SoundService
 
 __all__ = ["SoundService"]

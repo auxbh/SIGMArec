@@ -13,6 +13,7 @@ from typing import Callable, List, Optional
 import obsws_python as obsws
 
 from config.settings import AppSettings
+from core.interfaces.obs import IOBSController, IOBSEventHandler
 
 
 @contextmanager
@@ -33,7 +34,7 @@ def _suppress_obsws_logging():
 
 
 @dataclass
-class OBSController:
+class OBSController(IOBSController):
     """OBS WebSocket API wrapper providing a simple interface for interacting with OBS."""
 
     config: AppSettings
@@ -49,6 +50,14 @@ class OBSController:
     recording_active: bool = False
 
     recording_completed_callback: Optional[Callable[[str], None]] = None
+    _event_handlers: List[IOBSEventHandler] = None
+
+    _initial_connection_thread: Optional[threading.Thread] = None
+
+    def __post_init__(self):
+        """Initialize event handlers list."""
+        if self._event_handlers is None:
+            self._event_handlers = []
 
     @property
     def is_connected(self) -> bool:
@@ -71,15 +80,30 @@ class OBSController:
             _connection_lost=False,
         )
 
-        success = instance._attempt_connection()
-        if success:
-            logging.info("[OBS] Connected")
-        else:
-            logging.warning("[OBS] Failed to connect")
-
-        instance._start_keep_alive_thread()
+        instance._start_initial_connection_thread()
 
         return instance
+
+    def _start_initial_connection_thread(self):
+        """Start the initial connection attempt in a background thread."""
+        self._initial_connection_thread = threading.Thread(
+            target=self._attempt_initial_connection,
+            daemon=True,
+            name="OBSController-InitialConnection",
+        )
+        self._initial_connection_thread.start()
+        logging.debug("[OBS] Initial connection attempt started in background")
+
+    def _attempt_initial_connection(self):
+        """Attempt initial connection in background thread."""
+        success = self._attempt_connection()
+        if success:
+            logging.info("Connected to OBS")
+        else:
+            logging.warning("Failed to connect to OBS")
+            logging.info("Attempting to reconnect...")
+
+        self._start_keep_alive_thread()
 
     def _attempt_connection(self) -> bool:
         """Attempt to establish connection to OBS. Returns True if successful."""
@@ -99,7 +123,6 @@ class OBSController:
                     timeout=self.config.obs_timeout,
                 )
 
-                # Test the connection
                 req_client.get_version()
                 resp = req_client.get_record_status()
 
@@ -138,23 +161,18 @@ class OBSController:
                 if not self.is_connected:
                     self._reconnect()
                 else:
-                    # Test connection with a simple API call
                     with _suppress_obsws_logging():
                         self.req_client.get_version()
 
-                # Wait before next check
                 self._keep_alive_stop_event.wait(self.config.obs_timeout)
 
             except Exception as e:
                 logging.debug("[OBS] Keep-alive check failed: %s", str(e))
                 self._connection_lost = True
-                # Wait a bit before trying to reconnect
                 self._keep_alive_stop_event.wait(1)
 
     def _reconnect(self):
         """Attempt to reconnect to OBS WebSocket."""
-        logging.info("[OBS] Attempting to reconnect...")
-
         while not self._keep_alive_stop_event.is_set():
             if self._attempt_connection():
                 logging.info("[OBS] Reconnected successfully")
@@ -169,7 +187,13 @@ class OBSController:
         if self._keep_alive_thread is not None and self._keep_alive_thread.is_alive():
             self._keep_alive_thread.join(timeout=2.0)
 
-        logging.debug("[OBS] Keep-alive thread stopped")
+        if (
+            self._initial_connection_thread is not None
+            and self._initial_connection_thread.is_alive()
+        ):
+            self._initial_connection_thread.join(timeout=2.0)
+
+        logging.debug("[OBS] OBS controller shutdown complete")
 
     def __del__(self):
         """Destructor to ensure cleanup when object is garbage collected."""
@@ -189,22 +213,55 @@ class OBSController:
         self._prev_recording_active = self.recording_active
         if event.output_state == "OBS_WEBSOCKET_OUTPUT_STARTED":
             self.recording_active = True
-            logging.info("[OBS] Recording started")
+            logging.info("Recording started")
+            self._notify_recording_started()
         elif event.output_state == "OBS_WEBSOCKET_OUTPUT_STOPPED":
             self.recording_active = False
-            logging.info("[OBS] Recording stopped ('%s')", event.output_path)
+            logging.info("Recording stopped")
 
             if self.recording_completed_callback:
                 self.recording_completed_callback(event.output_path)
             else:
                 logging.debug("[OBS] Recording file available: %s", event.output_path)
 
-    def start_recording(self):
+            self._notify_recording_stopped(event.output_path)
+
+    def register_event_handler(self, handler: IOBSEventHandler) -> None:
+        """Register an event handler."""
+        if handler not in self._event_handlers:
+            self._event_handlers.append(handler)
+            logging.debug(
+                "[OBS] Registered event handler: %s", handler.__class__.__name__
+            )
+
+    def set_recording_completed_callback(self, callback: Callable[[str], None]) -> None:
+        """Set the callback function to be called when recording completes."""
+        self.recording_completed_callback = callback
+        logging.debug("[OBS] Recording completed callback set")
+
+    def _notify_recording_started(self) -> None:
+        """Notify all event handlers of recording start."""
+        for handler in self._event_handlers:
+            try:
+                handler.on_recording_started()
+            except Exception as e:
+                logging.error("[OBS] Error in recording started handler: %s", e)
+
+    def _notify_recording_stopped(self, output_path: str) -> None:
+        """Notify all event handlers of recording stop."""
+        for handler in self._event_handlers:
+            try:
+                handler.on_recording_stopped(output_path)
+            except Exception as e:
+                logging.error("[OBS] Error in recording stopped handler: %s", e)
+
+    def start_recording(self) -> None:
         """Start recording."""
         if not self.recording_active and self.is_connected:
             try:
                 with _suppress_obsws_logging():
                     self.req_client.start_record()
+                self._notify_recording_started()
             except Exception as e:
                 logging.debug("[OBS] Failed to start recording: %s", str(e))
                 self._connection_lost = True
@@ -237,25 +294,20 @@ class OBSController:
             fps: Frame rate (optional, preserves current if not specified)
         """
         if not self.is_connected:
-            logging.debug("[OBS] Cannot set video settings - not connected")
+            logging.warning("[OBS] Cannot set video settings - not connected")
             return
 
         try:
             with _suppress_obsws_logging():
-                # Get current video settings first to preserve other settings
                 current_settings = self.req_client.get_video_settings()
 
-                # Determine FPS values to use
                 if fps is not None:
-                    # Convert fps to numerator/denominator (assuming denominator = 1 for simplicity)
                     fps_numerator = int(fps)
                     fps_denominator = 1
                 else:
-                    # Preserve current FPS
                     fps_numerator = current_settings.fps_numerator
                     fps_denominator = current_settings.fps_denominator
 
-                # Update video settings
                 self.req_client.set_video_settings(
                     base_width=base_width,
                     base_height=base_height,
@@ -320,9 +372,7 @@ class OBSController:
             scene_name: Name of the scene to switch to
         """
         if not self.is_connected:
-            logging.debug(
-                "[OBS] Cannot switch to scene '%s' - not connected", scene_name
-            )
+            logging.warning("[OBS] Cannot switch scene - not connected")
             return
 
         try:
@@ -330,11 +380,9 @@ class OBSController:
             if current_scene != scene_name:
                 with _suppress_obsws_logging():
                     self.req_client.set_current_program_scene(scene_name)
-                logging.info("[OBS][Scene] '%s' → '%s'", current_scene, scene_name)
+                logging.debug("[OBS][Scene] '%s' → '%s'", current_scene, scene_name)
         except Exception as e:
-            logging.debug(
-                "[OBS] Failed to switch to scene '%s': %s", scene_name, str(e)
-            )
+            logging.error("[OBS] Failed to switch scene: %s", str(e))
             self._connection_lost = True
 
     def get_current_scene(self) -> Optional[str]:

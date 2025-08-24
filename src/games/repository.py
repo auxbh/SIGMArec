@@ -8,10 +8,7 @@ separating the concerns of data access from business logic.
 import logging
 from typing import Dict, List, Optional
 
-from games.objects import Game
-from games.objects.factory import GameFactory
-
-from .loader import GameDataError, GameDataLoader
+from . import Game, GameDataError, GameDataLoader, GameFactory
 
 
 class GameRepository:

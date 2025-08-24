@@ -1,0 +1,147 @@
+"""
+Dependency injection container for SIGMArec components.
+"""
+
+import logging
+from dataclasses import dataclass
+from typing import Any, Dict
+
+from audio import SoundService
+from config import ConfigManager
+from detection.engine import DetectionCoordinator
+from games import GameRepository
+from obs import OBSController, RecordingManager
+
+
+@dataclass
+class Container:
+    """
+    Simple dependency injection container.
+
+    Manages component lifecycle and dependencies for the application.
+    """
+
+    def __init__(self):
+        """Initialize empty container."""
+        self._services: Dict[str, Any] = {}
+        self._singletons: Dict[str, Any] = {}
+
+    def register_singleton(self, service_type: str, instance: Any) -> None:
+        """
+        Register a singleton service instance.
+
+        Args:
+            service_type: Type name for the service
+            instance: Service instance
+        """
+        self._singletons[service_type] = instance
+        logging.debug("[Container] Registered singleton: %s", service_type)
+
+    def get(self, service_type: str) -> Any:
+        """
+        Get a service instance.
+
+        Args:
+            service_type: Type name for the service
+
+        Returns:
+            Service instance
+
+        Raises:
+            KeyError: If service type not found
+        """
+        if service_type in self._singletons:
+            return self._singletons[service_type]
+
+        raise KeyError(f"Service not found: {service_type}")
+
+    def has(self, service_type: str) -> bool:
+        """
+        Check if container has a service.
+
+        Args:
+            service_type: Type name to check
+
+        Returns:
+            True if service exists
+        """
+        return service_type in self._singletons
+
+    def configure_application(self, config_path: str = "config.toml") -> "Container":
+        """
+        Configure the container with all application dependencies.
+
+        Args:
+            config_path: Path to configuration file
+
+        Returns:
+            Configured container instance
+        """
+        logging.debug("[Container] Configuring application dependencies")
+
+        # Step 1: Load configuration
+        config_manager = ConfigManager(config_path)
+        settings = config_manager.load_settings()
+        self.register_singleton("ConfigManager", config_manager)
+        self.register_singleton("AppSettings", settings)
+
+        # Step 2: Load games
+        game_repository = GameRepository()
+        games = game_repository.load_all_games()
+        self.register_singleton("GameRepository", game_repository)
+        self.register_singleton("Games", games)
+        logging.debug("[Container] Loaded %d games", len(games))
+
+        # Step 3: Initialize recording manager
+        recording_manager = RecordingManager(settings)
+        self.register_singleton("IRecordingManager", recording_manager)
+
+        # Step 4: Initialize OBS controller
+        obs_controller = OBSController.connect(settings)
+        self.register_singleton("IOBSController", obs_controller)
+
+        # Step 5: Initialize audio service
+        sound_service = SoundService(settings)
+        self.register_singleton("SoundService", sound_service)
+
+        # Step 6: Initialize detection engine
+        detection_engine = DetectionCoordinator(
+            obs_controller=obs_controller,
+            recording_manager=recording_manager,
+            games=games,
+            settings=settings,
+        )
+        self.register_singleton("IDetectionEngine", detection_engine)
+
+        logging.debug("[Container] Application dependencies configured")
+        return self
+
+    def cleanup(self) -> None:
+        """Clean up all registered services."""
+        logging.info("[Container] Cleaning up services")
+
+        # Run cleanup or shutdown in reverse order from singleton registration
+        for service_name in reversed(list(self._singletons.keys())):
+            service = self._singletons[service_name]
+
+            # Call cleanup method if it exists
+            if hasattr(service, "cleanup"):
+                try:
+                    service.cleanup()
+                    logging.debug("[Container] Cleaned up: %s", service_name)
+                except Exception as e:
+                    logging.error(
+                        "[Container] Error cleaning up %s: %s", service_name, e
+                    )
+            # Otherwise, call shutdown method if it exists
+            elif hasattr(service, "shutdown"):
+                try:
+                    service.shutdown()
+                    logging.debug("[Container] Shut down: %s", service_name)
+                except Exception as e:
+                    logging.error(
+                        "[Container] Error shutting down %s: %s", service_name, e
+                    )
+
+        self._singletons.clear()
+        logging.debug("[Container] Cleanup complete")

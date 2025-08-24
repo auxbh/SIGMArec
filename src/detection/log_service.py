@@ -215,10 +215,8 @@ class LogService:
         since_timestamp: Optional[str] = None,
     ) -> bool:
         """
-        Check if there are recent playing pattern matches in the log file.
-
-        This method checks for playing patterns that occurred after a given timestamp,
-        which can be used to detect new playing sessions even when already in playing state.
+        Checks for playing patterns that occurred after a given timestamp.
+        Used to detect new playing sessions even when already in playing state.
 
         Args:
             game_name: Name of the game for logging purposes
@@ -238,26 +236,20 @@ class LogService:
         if not log_path:
             return False
 
-        # Get recent entries
         if since_timestamp:
             all_entries = self.read_log_entries(log_path)
-            # Find entries after the given timestamp
             recent_entries = []
-            for entry in reversed(all_entries):  # Start from newest
+            for entry in reversed(all_entries):
                 if entry.get("date", "") > since_timestamp:
-                    recent_entries.insert(
-                        0, entry
-                    )  # Insert at beginning to maintain order
+                    recent_entries.insert(0, entry)
                 else:
                     break
         else:
-            # Just check the last few entries
             recent_entries = self.read_log_entries(log_path, max_entries=10)
 
         if not recent_entries:
             return False
 
-        # Check if any playing patterns match the recent entries
         for pattern in playing_patterns:
             if pattern.matches(recent_entries):
                 logging.debug(

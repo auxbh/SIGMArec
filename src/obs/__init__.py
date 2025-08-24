@@ -1,10 +1,8 @@
 """
-OBS module for SIGMArec.
-
-Provides OBS WebSocket API wrapper and recording manager.
+OBS integration module.
 """
 
-from .controller import OBSController
-from .manager import Recording
+from obs.controller import OBSController
+from obs.recording_manager import RecordingManager
 
-__all__ = ["OBSController", "Recording"]
+__all__ = ["OBSController", "RecordingManager"]

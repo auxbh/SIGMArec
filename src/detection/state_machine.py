@@ -87,7 +87,6 @@ class StateMachine:
 
         self._history.append(new_state)
         if len(self._history) > self._max_history:
-            # Keep only the newest entries
             self._history = self._history[-self._max_history :]
 
         self._last_matches = self._match_tail_patterns()
@@ -96,7 +95,6 @@ class StateMachine:
         """Return pattern names that matched when the most recent state was pushed."""
         return list(self._last_matches)
 
-    # Internal helpers
     def _match_tail_patterns(self) -> List[str]:
         matches: List[str] = []
         for pattern in self._patterns:

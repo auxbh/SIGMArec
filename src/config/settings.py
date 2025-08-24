@@ -1,8 +1,6 @@
 """
 Application configuration handling.
-
-This module handles loading and managing application settings from config.toml
-and other configuration sources.
+This module handles loading and managing application settings from config.toml.
 """
 
 import re
@@ -24,19 +22,9 @@ class ValidationError(ConfigurationError):
 class ConfigValidator:
     """Handles validation and type conversion of configuration values."""
 
-    # Valid game shortnames for scene configuration
     VALID_GAMES = {"IIDXINF", "SDVXEAC", "IIDX31", "IIDX32", "SDVXEG", "BMS"}
-
-    # Valid states for scene configuration
     VALID_STATES = {"Select", "Playing", "Result", "Default"}
-
-    # Valid keys for default scene configuration
-    VALID_DEFAULT_SCENE_KEYS = VALID_STATES
-
-    # Valid keys for default video configuration
-    VALID_DEFAULT_VIDEO_KEYS = {"Base", "Output", "FPS"}
-
-    # Keyboard key patterns
+    VALID_VIDEO_KEYS = {"Base", "Output", "FPS"}
     KEY_PATTERN = re.compile(
         r"^(?:(?:ctrl|alt|shift|cmd|win)\+)*"
         r'[a-zA-Z0-9_\-\+\[\]\\;\'",./`~!@#$%^&*()={}|:<>? ]$|'
@@ -212,7 +200,7 @@ class ConfigValidator:
 
         for key, config in value.items():
             if key in ConfigValidator.VALID_GAMES:
-                # Game-specific configuration
+                # Game-specific scene configuration
                 game = key
                 states = config
 
@@ -239,12 +227,12 @@ class ConfigValidator:
 
                 validated_scenes[game] = validated_states
 
-            elif key in ConfigValidator.VALID_DEFAULT_SCENE_KEYS:
-                # Default configuration - store under special "Default" key
+            elif key in ConfigValidator.VALID_STATES:
+                # Default scene configuration
                 if "Default" not in validated_scenes:
                     validated_scenes["Default"] = {}
 
-                # Validate scene name for default
+                # Validate scene name
                 scene_str = ConfigValidator.validate_string(
                     config, f"{field_name}.{key}", allow_empty=False
                 )
@@ -254,7 +242,7 @@ class ConfigValidator:
                 raise ValidationError(
                     f"Invalid key '{key}' in {field_name}. "
                     f"Valid games: {', '.join(sorted(ConfigValidator.VALID_GAMES))} "
-                    f"Valid states: {', '.join(sorted(ConfigValidator.VALID_DEFAULT_SCENE_KEYS))}"
+                    f"Valid states: {', '.join(sorted(ConfigValidator.VALID_STATES))}"
                 )
 
         return validated_scenes
@@ -272,7 +260,7 @@ class ConfigValidator:
 
         for key, config in value.items():
             if key in ConfigValidator.VALID_GAMES:
-                # Game-specific configuration
+                # Game-specific video configuration
                 game = key
                 video_config = config
 
@@ -282,6 +270,7 @@ class ConfigValidator:
                         f"Video configuration for '{game}' must be a dictionary"
                     )
 
+                # Validate video settings
                 validated_config = {}
                 for setting_type, setting_value in video_config.items():
                     validated_setting = ConfigValidator._validate_video_setting(
@@ -291,11 +280,12 @@ class ConfigValidator:
 
                 validated_video[game] = validated_config
 
-            elif key in ConfigValidator.VALID_DEFAULT_VIDEO_KEYS:
-                # Default configuration - store under special "Default" key
+            elif key in ConfigValidator.VALID_VIDEO_KEYS:
+                # Default video configuration
                 if "Default" not in validated_video:
                     validated_video["Default"] = {}
 
+                # Validate video setting
                 validated_setting = ConfigValidator._validate_video_setting(
                     key, config, field_name
                 )
@@ -305,7 +295,7 @@ class ConfigValidator:
                 raise ValidationError(
                     f"Invalid key '{key}' in {field_name}. "
                     f"Valid games: {', '.join(sorted(ConfigValidator.VALID_GAMES))} "
-                    f"Valid settings: {', '.join(sorted(ConfigValidator.VALID_DEFAULT_VIDEO_KEYS))}"
+                    f"Valid video settings: {', '.join(sorted(ConfigValidator.VALID_VIDEO_KEYS))}"
                 )
 
         return validated_video
@@ -315,11 +305,11 @@ class ConfigValidator:
         setting_type: str, setting_value: Any, field_prefix: str
     ) -> str:
         """Helper method to validate individual video settings."""
-        # Validate setting type (Base, Output, or FPS)
-        if setting_type not in ConfigValidator.VALID_DEFAULT_VIDEO_KEYS:
+        # Validate setting type
+        if setting_type not in ConfigValidator.VALID_VIDEO_KEYS:
             raise ValidationError(
                 f"Invalid video setting '{setting_type}' in {field_prefix}. "
-                f"Valid settings: {', '.join(sorted(ConfigValidator.VALID_DEFAULT_VIDEO_KEYS))}"
+                f"Valid settings: {', '.join(sorted(ConfigValidator.VALID_VIDEO_KEYS))}"
             )
 
         if setting_type == "FPS":
@@ -368,7 +358,7 @@ class ConfigValidator:
 
 @dataclass
 class AppSettings:
-    """Application settings data class matching your existing config.toml structure."""
+    """Application settings data class matching config.toml structure."""
 
     save_key: str = "space"
     debug: bool = False
@@ -415,9 +405,11 @@ class AppSettings:
         if game in self.scenes and state in self.scenes[game]:
             return self.scenes[game][state]
 
+        # Fall back to default configuration for state if it exists
         if state in self.scenes["Default"]:
             return self.scenes["Default"][state]
 
+        # Fall back to default scene if it exists
         if "Default" in self.scenes:
             return self.scenes["Default"]["Default"]
 
@@ -438,14 +430,14 @@ class AppSettings:
         if game in self.video and setting in self.video[game]:
             return self.video[game][setting]
 
-        # Fall back to default configuration if it exists
+        # Fall back to default video configuration if it exists
         if "Default" in self.video and setting in self.video["Default"]:
             return self.video["Default"][setting]
 
         return None
 
     def to_dict(self) -> Dict[str, Any]:
-        """Convert settings to dictionary matching your config.toml structure."""
+        """Convert settings to dictionary matching config.toml structure."""
         result = {
             "input": {
                 "save_key": self.save_key,
@@ -595,7 +587,7 @@ class ConfigManager:
             return AppSettings(
                 # Input section validation
                 save_key=ConfigValidator.validate_keyboard_key(
-                    input_config.get("save_key"), "input.save_key", "space"
+                    input_config.get("save_key"), "input.save_key", "ctrl+space"
                 ),
                 debug=ConfigValidator.validate_bool(
                     input_config.get("debug"), "input.debug", False
