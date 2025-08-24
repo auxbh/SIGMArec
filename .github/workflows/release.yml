@@ -28,7 +28,7 @@ jobs:
 
       - name: Build binary and prepare release
         run: |
-          build.ps1
+          powershell -File .\build.ps1
 
       - name: Create ZIP archive
         run: powershell Compress-Archive -Path release\* -DestinationPath sigmarec-${{ github.ref_name }}.zip
