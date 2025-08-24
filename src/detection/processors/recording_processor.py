@@ -56,17 +56,17 @@ class RecordingProcessor:
             return
 
         if "start_play" in patterns and not self.obs.recording_active:
-            self._start_recording()
+            self._start_recording(play_sound=True)
             return
 
         if "discard_play" in patterns and self.obs.recording_active:
             self._delete_next_recording = True
             self._restart_after_stop = False
-            self._stop_recording(immediate=True, play_failed=True)
+            self._stop_recording(immediate=True, sound="failed")
             return
 
         if "stop_play" in patterns and self.obs.recording_active:
-            self._stop_recording(immediate=False)
+            self._stop_recording(immediate=False, sound="ready")
             return
 
     def handle_recording_completed(self, output_path: str) -> bool:
@@ -85,7 +85,7 @@ class RecordingProcessor:
         if self._restart_after_stop:
             logging.debug("[RecordingProcessor] Starting new recording after restart")
             self._restart_after_stop = False
-            self._start_recording()
+            self._start_recording(play_sound=True)
 
         if should_delete:
 
@@ -112,7 +112,7 @@ class RecordingProcessor:
         """Mark the next recording for deletion."""
         self._delete_next_recording = True
 
-    def _stop_recording(self, immediate: bool, play_failed: bool = False) -> None:
+    def _stop_recording(self, immediate: bool, sound: str = None) -> None:
         """Stop recording with optional delay and sound feedback."""
         if not immediate:
             logging.debug(
@@ -121,8 +121,8 @@ class RecordingProcessor:
             )
             time.sleep(self.settings.result_wait)
 
-        if play_failed:
-            self.sound_service.play_failed()
+        if sound:
+            self.sound_service.play_sound(sound)
 
         self.obs.stop_recording()
 
