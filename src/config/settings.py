@@ -360,7 +360,7 @@ class ConfigValidator:
 class AppSettings:
     """Application settings data class matching config.toml structure."""
 
-    save_key: str = "space"
+    save_key: str = "ctrl+space"
     debug: bool = False
 
     obs_host: str = "localhost"
@@ -376,9 +376,10 @@ class AppSettings:
     detection_interval: float = 0.25
     detections_required: int = 2
 
-    result_wait: float = 2
+    result_wait: float = 1.5
     organize_by_game: bool = True
     save_thumbnails: bool = True
+    scene_change_delay: float = 0.3
 
     scenes: Dict[str, Dict[str, str]] = None
     video: Dict[str, Dict[str, str]] = None
@@ -463,6 +464,7 @@ class AppSettings:
                 "result_wait": self.result_wait,
                 "organize_by_game": self.organize_by_game,
                 "save_thumbnails": self.save_thumbnails,
+                "scene_change_delay": self.scene_change_delay,
             },
         }
 
@@ -637,7 +639,7 @@ class ConfigManager:
                 result_wait=ConfigValidator.validate_float(
                     recording_config.get("result_wait"),
                     "recording.result_wait",
-                    2.0,
+                    1.5,
                     min_val=0.0,
                     max_val=120.0,
                 ),
@@ -650,6 +652,13 @@ class ConfigManager:
                     recording_config.get("save_thumbnails"),
                     "recording.save_thumbnails",
                     True,
+                ),
+                scene_change_delay=ConfigValidator.validate_float(
+                    recording_config.get("scene_change_delay"),
+                    "recording.scene_change_delay",
+                    0.3,
+                    min_val=0.0,
+                    max_val=5.0,
                 ),
                 # Scene configuration validation
                 scenes=ConfigValidator.validate_scenes(scenes, "scenes"),
