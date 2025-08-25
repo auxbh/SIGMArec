@@ -9,6 +9,8 @@ from typing import Any, Dict
 from audio import SoundService
 from config import ConfigManager
 from detection.engine import DetectionCoordinator
+from detection.processors.recording_processor import RecordingProcessor
+from detection.processors.scene_processor import SceneProcessor
 from games import GameRepository
 from obs import OBSController, RecordingManager
 
@@ -92,24 +94,34 @@ class Container:
         self.register_singleton("Games", games)
         logging.debug("[Container] Loaded %d games", len(games))
 
-        # Step 3: Initialize recording manager
-        recording_manager = RecordingManager(settings)
-        self.register_singleton("IRecordingManager", recording_manager)
-
-        # Step 4: Initialize OBS controller
-        obs_controller = OBSController.connect(settings)
-        self.register_singleton("IOBSController", obs_controller)
-
-        # Step 5: Initialize audio service
+        # Step 3: Initialize audio service
         sound_service = SoundService(settings)
         self.register_singleton("SoundService", sound_service)
 
-        # Step 6: Initialize detection engine
+        # Step 4: Initialize recording manager
+        recording_manager = RecordingManager(settings, sound_service=sound_service)
+        self.register_singleton("IRecordingManager", recording_manager)
+
+        # Step 5: Initialize OBS controller
+        obs_controller = OBSController.connect(settings)
+        self.register_singleton("IOBSController", obs_controller)
+
+        # Step 6: Initialize processors
+        scene_processor = SceneProcessor(obs_controller, settings)
+        self.register_singleton("SceneProcessor", scene_processor)
+        recording_processor = RecordingProcessor(
+            obs_controller, settings, scene_processor, sound_service
+        )
+        self.register_singleton("RecordingProcessor", recording_processor)
+
+        # Step 7: Initialize detection engine
         detection_engine = DetectionCoordinator(
             obs_controller=obs_controller,
             recording_manager=recording_manager,
             games=games,
             settings=settings,
+            scene_processor=scene_processor,
+            recording_processor=recording_processor,
         )
         self.register_singleton("IDetectionEngine", detection_engine)
 
