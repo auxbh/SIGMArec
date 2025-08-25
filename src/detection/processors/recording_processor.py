@@ -13,21 +13,32 @@ from config.settings import AppSettings
 from core.interfaces.detection import StateTransition
 from core.interfaces.obs import IOBSController
 
+from .scene_processor import SceneProcessor
+
 
 class RecordingProcessor:
     """Processes state transitions to control recording operations."""
 
-    def __init__(self, obs_controller: IOBSController, settings: AppSettings):
+    def __init__(
+        self,
+        obs_controller: IOBSController,
+        settings: AppSettings,
+        scene_processor: SceneProcessor,
+        sound_service: SoundService,
+    ):
         """
         Initialize recording processor.
 
         Args:
             obs_controller: OBS controller for recording operations
             settings: Application settings
+            scene_processor: Optional scene processor for checking recording delays
+            sound_service: Sound service for playing sounds
         """
         self.obs = obs_controller
         self.settings = settings
-        self.sound_service = SoundService(settings)
+        self.sound_service = sound_service
+        self.scene_processor = scene_processor
 
         self._delete_next_recording = False
         self._restart_after_stop = False
@@ -66,7 +77,7 @@ class RecordingProcessor:
             return
 
         if "stop_play" in patterns and self.obs.recording_active:
-            self._stop_recording(immediate=False, sound="ready")
+            self._stop_recording(immediate=False)
             return
 
     def handle_recording_completed(self, output_path: str) -> bool:
@@ -97,6 +108,31 @@ class RecordingProcessor:
         return should_delete
 
     def _start_recording(self, play_sound: bool = True) -> None:
+        """
+        Start recording with optional scene change delay.
+
+        Args:
+            play_sound: Whether to play start sound
+        """
+        if self.scene_processor:
+            delay_remaining = self.scene_processor.get_recording_delay_remaining()
+            if delay_remaining > 0:
+                logging.debug(
+                    "[RecordingProcessor] Delaying recording start by %.2fs",
+                    delay_remaining,
+                )
+
+                def _delayed_start():
+                    time.sleep(delay_remaining)
+                    if not self.obs.recording_active:
+                        self._start_recording_immediate(play_sound=play_sound)
+
+                threading.Thread(target=_delayed_start, daemon=True).start()
+                return
+
+        self._start_recording_immediate(play_sound=play_sound)
+
+    def _start_recording_immediate(self, play_sound: bool = True) -> None:
         """Start recording with optional sound feedback."""
         if play_sound:
             self.sound_service.play_start()
