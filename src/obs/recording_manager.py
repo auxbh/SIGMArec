@@ -13,6 +13,7 @@ from typing import Optional, Tuple
 
 import mss.tools
 
+from audio import SoundService
 from config.settings import AppSettings
 from core.interfaces.recording import IRecordingManager
 from detection.screen_capture import ScreenCaptureService
@@ -22,16 +23,23 @@ from games.objects import Game
 class RecordingManager(IRecordingManager):
     """Manages recording file operations and organization."""
 
-    def __init__(self, settings: AppSettings, obs_recording_dir: Optional[str] = None):
+    def __init__(
+        self,
+        settings: AppSettings,
+        obs_recording_dir: Optional[str] = None,
+        sound_service: SoundService = None,
+    ):
         """
         Initialize the recording manager.
 
         Args:
             settings: Application settings
             obs_recording_dir: Directory where OBS saves recordings (optional)
+            sound_service: Sound service for playing sounds
         """
         self.settings = settings
         self.obs_recording_dir = Path(obs_recording_dir) if obs_recording_dir else None
+        self.sound_service = sound_service
         self._current_lastplay_path: Optional[Path] = None
         self._current_thumbnail_path: Optional[Path] = None
 
@@ -86,6 +94,8 @@ class RecordingManager(IRecordingManager):
             "[Recording] Recording renamed to lastplay: %s",
             lastplay_path.name,
         )
+
+        self.sound_service.play_ready()
 
         return str(lastplay_path)
 
