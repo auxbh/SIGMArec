@@ -19,9 +19,10 @@ interval = 0.25 # Seconds between game state detection checks
 detections_required = 2 # Consecutive matching detections needed to confirm state change
 
 [recording]
-result_wait = 2 # Seconds to display result screen before stopping
+result_wait = 1.5 # Seconds to display result screen before stopping
 organize_by_game = true # Create separate folders for each detected game
 save_thumbnails = true # Generate thumbnail images when recordings end
+scene_change_delay = 0.3 # Delay in seconds before recording can start after scene change (should match your OBS scene transition duration)
 
 [scenes] 
 # Optional: Automatically switch OBS scenes based on detected game state
