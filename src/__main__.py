@@ -18,7 +18,7 @@ def main():
     if app.initialize():
         app.run()
     else:
-        print("Failed to initialize SIGMArec. Check logs for details.")
+        input("\nPress Enter to exit...")
         return 1
 
     return 0
