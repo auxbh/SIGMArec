@@ -2,7 +2,8 @@
 OBS integration module.
 """
 
-from obs.controller import OBSController
-from obs.recording_manager import RecordingManager
+from .controller import OBSController
+from .recording_manager import RecordingManager
+from .videosettings import OBSVideoSettings
 
-__all__ = ["OBSController", "RecordingManager"]
+__all__ = ["OBSController", "RecordingManager", "OBSVideoSettings"]

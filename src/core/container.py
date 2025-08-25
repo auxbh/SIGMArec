@@ -12,7 +12,6 @@ from detection.engine import DetectionCoordinator
 from detection.processors.recording_processor import RecordingProcessor
 from detection.processors.scene_processor import SceneProcessor
 from games import GameRepository
-from obs import OBSController, RecordingManager
 
 
 @dataclass
@@ -99,14 +98,22 @@ class Container:
         self.register_singleton("SoundService", sound_service)
 
         # Step 4: Initialize recording manager
+        from obs import RecordingManager
+
         recording_manager = RecordingManager(settings, sound_service=sound_service)
         self.register_singleton("IRecordingManager", recording_manager)
 
         # Step 5: Initialize OBS controller
+        from obs import OBSController
+
         obs_controller = OBSController.connect(settings)
         self.register_singleton("IOBSController", obs_controller)
 
         # Step 6: Initialize processors
+        from detection.processors.video_processor import VideoProcessor
+
+        video_processor = VideoProcessor(obs_controller, settings)
+        self.register_singleton("VideoProcessor", video_processor)
         scene_processor = SceneProcessor(obs_controller, settings)
         self.register_singleton("SceneProcessor", scene_processor)
         recording_processor = RecordingProcessor(
@@ -120,6 +127,7 @@ class Container:
             recording_manager=recording_manager,
             games=games,
             settings=settings,
+            video_processor=video_processor,
             scene_processor=scene_processor,
             recording_processor=recording_processor,
         )

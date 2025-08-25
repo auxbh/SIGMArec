@@ -4,5 +4,6 @@ State change processors package.
 
 from .recording_processor import RecordingProcessor
 from .scene_processor import SceneProcessor
+from .video_processor import VideoProcessor
 
-__all__ = ["RecordingProcessor", "SceneProcessor"]
+__all__ = ["RecordingProcessor", "SceneProcessor", "VideoProcessor"]

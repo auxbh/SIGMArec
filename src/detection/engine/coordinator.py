@@ -15,7 +15,7 @@ from core.interfaces import (
 )
 from detection.detectors import GameDetector, LogStateDetector, PixelStateDetector
 from detection.engine.state_manager import StateManager
-from detection.processors import RecordingProcessor, SceneProcessor
+from detection.processors import RecordingProcessor, SceneProcessor, VideoProcessor
 from games import Game
 
 
@@ -33,6 +33,7 @@ class DetectionCoordinator(IDetectionEngine):
         recording_manager: IRecordingManager,
         games: List[Game],
         settings: AppSettings,
+        video_processor: VideoProcessor,
         scene_processor: SceneProcessor,
         recording_processor: RecordingProcessor,
     ):
@@ -55,6 +56,7 @@ class DetectionCoordinator(IDetectionEngine):
         self.game_detector = GameDetector(games)
         self.pixel_detector = PixelStateDetector(settings.detections_required)
         self.log_detector = LogStateDetector(settings.detections_required)
+        self.video_processor = video_processor
         self.recording_processor = recording_processor
         self.scene_processor = scene_processor
 
@@ -83,6 +85,7 @@ class DetectionCoordinator(IDetectionEngine):
                 self.recording_processor.mark_for_deletion()
                 self.recording_processor.stop_recording_immediate(play_failed=True)
 
+            self.video_processor.process_game_change(active_game)
             self.scene_processor.process_game_change(active_game)
 
             self.pixel_detector.reset_detection_state()
@@ -109,6 +112,7 @@ class DetectionCoordinator(IDetectionEngine):
         # Process state changes
         state_transition = self.state_manager.update_state(detected_state)
         if state_transition:
+            self.video_processor.process_transition(state_transition)
             self.scene_processor.process_transition(state_transition)
             self.recording_processor.process_transition(state_transition)
 

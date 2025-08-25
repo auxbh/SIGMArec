@@ -3,7 +3,10 @@ OBS integration interfaces.
 """
 
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import TYPE_CHECKING, List, Optional
+
+if TYPE_CHECKING:
+    from obs import OBSVideoSettings
 
 
 class IOBSEventHandler(ABC):
@@ -40,6 +43,10 @@ class IOBSController(ABC):
         """Stop recording."""
 
     @abstractmethod
+    def get_video_settings(self) -> Optional["OBSVideoSettings"]:
+        """Get current video settings."""
+
+    @abstractmethod
     def set_current_scene(self, scene_name: str) -> None:
         """Switch to specified scene."""
 
@@ -54,11 +61,7 @@ class IOBSController(ABC):
     @abstractmethod
     def set_video_settings(
         self,
-        base_width: int,
-        base_height: int,
-        output_width: int,
-        output_height: int,
-        fps: float = None,
+        obssettings: "OBSVideoSettings",
     ) -> None:
         """Set video settings."""
 

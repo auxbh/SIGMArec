@@ -416,27 +416,6 @@ class AppSettings:
 
         return None
 
-    def get_video_setting(self, game: str, setting: str) -> Optional[str]:
-        """
-        Get video setting for a specific game with fallback to defaults.
-
-        Args:
-            game: Game shortname (e.g., 'IIDX31', 'BMS')
-            setting: Video setting type ('Base', 'Output', 'FPS')
-
-        Returns:
-            Setting value if found, None if no configuration exists
-        """
-        # First check game-specific configuration
-        if game in self.video and setting in self.video[game]:
-            return self.video[game][setting]
-
-        # Fall back to default video configuration if it exists
-        if "Default" in self.video and setting in self.video["Default"]:
-            return self.video["Default"][setting]
-
-        return None
-
     def to_dict(self) -> Dict[str, Any]:
         """Convert settings to dictionary matching config.toml structure."""
         result = {

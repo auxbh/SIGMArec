@@ -14,6 +14,7 @@ import obsws_python as obsws
 
 from config.settings import AppSettings
 from core.interfaces.obs import IOBSController, IOBSEventHandler
+from obs.videosettings import OBSVideoSettings
 
 
 @contextmanager
@@ -37,7 +38,7 @@ def _suppress_obsws_logging():
 class OBSController(IOBSController):
     """OBS WebSocket API wrapper providing a simple interface for interacting with OBS."""
 
-    config: AppSettings
+    settings: AppSettings
 
     req_client: obsws.ReqClient
     event_client: obsws.EventClient
@@ -75,7 +76,7 @@ class OBSController(IOBSController):
         instance = cls(
             req_client=None,
             event_client=None,
-            config=settings,
+            settings=settings,
             recording_active=False,
             _connection_lost=False,
         )
@@ -110,17 +111,17 @@ class OBSController(IOBSController):
         try:
             with _suppress_obsws_logging():
                 req_client = obsws.ReqClient(
-                    host=self.config.obs_host,
-                    port=self.config.obs_port,
-                    password=self.config.obs_password,
-                    timeout=self.config.obs_timeout,
+                    host=self.settings.obs_host,
+                    port=self.settings.obs_port,
+                    password=self.settings.obs_password,
+                    timeout=self.settings.obs_timeout,
                 )
 
                 event_client = obsws.EventClient(
-                    host=self.config.obs_host,
-                    port=self.config.obs_port,
-                    password=self.config.obs_password,
-                    timeout=self.config.obs_timeout,
+                    host=self.settings.obs_host,
+                    port=self.settings.obs_port,
+                    password=self.settings.obs_password,
+                    timeout=self.settings.obs_timeout,
                 )
 
                 req_client.get_version()
@@ -164,7 +165,7 @@ class OBSController(IOBSController):
                     with _suppress_obsws_logging():
                         self.req_client.get_version()
 
-                self._keep_alive_stop_event.wait(self.config.obs_timeout)
+                self._keep_alive_stop_event.wait(self.settings.obs_timeout)
 
             except Exception as e:
                 logging.debug("[OBS] Keep-alive check failed: %s", str(e))
@@ -277,21 +278,13 @@ class OBSController(IOBSController):
 
     def set_video_settings(
         self,
-        base_width: int,
-        base_height: int,
-        output_width: int,
-        output_height: int,
-        fps: float = None,
+        obssettings: OBSVideoSettings,
     ):
         """
-        Set OBS video settings (base canvas, output resolution, and optionally FPS).
+        Set OBS video settings (base canvas, output resolution, and FPS).
 
         Args:
-            base_width: Base canvas width
-            base_height: Base canvas height
-            output_width: Output scaled width
-            output_height: Output scaled height
-            fps: Frame rate (optional, preserves current if not specified)
+            obssettings: OBSVideoSettings object
         """
         if not self.is_connected:
             logging.warning("[OBS] Cannot set video settings - not connected")
@@ -301,12 +294,30 @@ class OBSController(IOBSController):
             with _suppress_obsws_logging():
                 current_settings = self.req_client.get_video_settings()
 
-                if fps is not None:
-                    fps_numerator = int(fps)
-                    fps_denominator = 1
-                else:
-                    fps_numerator = current_settings.fps_numerator
-                    fps_denominator = current_settings.fps_denominator
+                base_width = obssettings.base_width or current_settings.base_width
+                base_height = obssettings.base_height or current_settings.base_height
+                output_width = obssettings.output_width or current_settings.output_width
+                output_height = (
+                    obssettings.output_height or current_settings.output_height
+                )
+                fps_numerator = (
+                    obssettings.fps_numerator or current_settings.fps_numerator
+                )
+                fps_denominator = (
+                    obssettings.fps_denominator or current_settings.fps_denominator
+                )
+
+                logging.debug(
+                    "[OBS] Setting video settings: %s",
+                    {
+                        "base_width": base_width,
+                        "base_height": base_height,
+                        "output_width": output_width,
+                        "output_height": output_height,
+                        "fps_numerator": fps_numerator,
+                        "fps_denominator": fps_denominator,
+                    },
+                )
 
                 self.req_client.set_video_settings(
                     base_width=base_width,
@@ -316,29 +327,11 @@ class OBSController(IOBSController):
                     numerator=fps_numerator,
                     denominator=fps_denominator,
                 )
-
-            if fps is not None:
-                logging.info(
-                    "[OBS][Video] Settings updated: Base %dx%d, Output %dx%d, FPS %s",
-                    base_width,
-                    base_height,
-                    output_width,
-                    output_height,
-                    fps,
-                )
-            else:
-                logging.info(
-                    "[OBS][Video] Settings updated: Base %dx%d, Output %dx%d",
-                    base_width,
-                    base_height,
-                    output_width,
-                    output_height,
-                )
         except Exception as e:
             logging.debug("[OBS] Failed to set video settings: %s", str(e))
             self._connection_lost = True
 
-    def get_video_settings(self) -> Optional[dict]:
+    def get_video_settings(self) -> Optional[OBSVideoSettings]:
         """
         Get current OBS video settings.
 
@@ -351,18 +344,81 @@ class OBSController(IOBSController):
         try:
             with _suppress_obsws_logging():
                 response = self.req_client.get_video_settings()
-            return {
-                "base_width": response.base_width,
-                "base_height": response.base_height,
-                "output_width": response.output_width,
-                "output_height": response.output_height,
-                "fps_numerator": response.fps_numerator,
-                "fps_denominator": response.fps_denominator,
-            }
+            return OBSVideoSettings(
+                base_width=response.base_width,
+                base_height=response.base_height,
+                output_width=response.output_width,
+                output_height=response.output_height,
+                fps_numerator=response.fps_numerator,
+                fps_denominator=response.fps_denominator,
+            )
         except Exception as e:
             logging.debug("[OBS] Failed to get video settings: %s", str(e))
             self._connection_lost = True
             return None
+
+    def get_game_video_settings(self, game: str) -> Optional[OBSVideoSettings]:
+        """
+        Get video settings for a specific game with fallback to defaults.
+
+        Args:
+            game: Game shortname (e.g., 'IIDX31', 'BMS')
+
+        Returns:
+            OBSVideoSettings object if configuration exists, None otherwise
+        """
+
+        def parse_resolution(res_str: str) -> tuple[int, int] or None:
+            """Parse resolution string like '1920x1080' into (width, height)."""
+            if not res_str:
+                return None
+            parts = res_str.split("x")
+            if len(parts) != 2:
+                return None
+            try:
+                width = int(parts[0].strip())
+                height = int(parts[1].strip())
+                return (width, height)
+            except (ValueError, TypeError):
+                return None
+
+        def parse_fps(fps_str: str) -> tuple[int, int] or None:
+            """Parse FPS string like '60' or '59.94' into (numerator, denominator)."""
+            if not fps_str:
+                return None
+            try:
+                fps_value = float(fps_str)
+                if fps_value <= 0:
+                    return None
+                return (int(fps_value), 1)
+            except (ValueError, TypeError):
+                return None
+
+        game_settings = self.settings.video.get(game, {})
+        default_settings = self.settings.video.get("Default", {})
+
+        combined_settings = default_settings.copy()
+        combined_settings.update(game_settings)
+
+        if not combined_settings:
+            return None
+
+        base_res = parse_resolution(combined_settings.get("Base", None))
+        output_res = parse_resolution(combined_settings.get("Output", None))
+        fps_numerator, fps_denominator = parse_fps(combined_settings.get("FPS", None))
+
+        obssettings = OBSVideoSettings(
+            base_width=base_res[0],
+            base_height=base_res[1],
+            output_width=output_res[0],
+            output_height=output_res[1],
+            fps_numerator=fps_numerator,
+            fps_denominator=fps_denominator,
+        )
+
+        logging.debug("[OBS] Game video settings: %s", obssettings)
+
+        return obssettings
 
     def set_current_scene(self, scene_name: str):
         """
