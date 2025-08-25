@@ -33,6 +33,8 @@ class DetectionCoordinator(IDetectionEngine):
         recording_manager: IRecordingManager,
         games: List[Game],
         settings: AppSettings,
+        scene_processor: SceneProcessor,
+        recording_processor: RecordingProcessor,
     ):
         """
         Initialize detection coordinator.
@@ -42,6 +44,8 @@ class DetectionCoordinator(IDetectionEngine):
             recording_manager: Recording manager interface
             games: List of games to detect
             settings: Application settings
+            scene_processor: Scene processor
+            recording_processor: Recording processor
         """
         self.obs = obs_controller
         self.recording_manager = recording_manager
@@ -51,8 +55,8 @@ class DetectionCoordinator(IDetectionEngine):
         self.game_detector = GameDetector(games)
         self.pixel_detector = PixelStateDetector(settings.detections_required)
         self.log_detector = LogStateDetector(settings.detections_required)
-        self.recording_processor = RecordingProcessor(obs_controller, settings)
-        self.scene_processor = SceneProcessor(obs_controller, settings)
+        self.recording_processor = recording_processor
+        self.scene_processor = scene_processor
 
         self.obs.register_event_handler(self)
 
@@ -105,8 +109,8 @@ class DetectionCoordinator(IDetectionEngine):
         # Process state changes
         state_transition = self.state_manager.update_state(detected_state)
         if state_transition:
-            self.recording_processor.process_transition(state_transition)
             self.scene_processor.process_transition(state_transition)
+            self.recording_processor.process_transition(state_transition)
 
         return DetectionResult(
             game=active_game,
