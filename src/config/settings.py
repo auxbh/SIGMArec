@@ -402,16 +402,21 @@ class AppSettings:
         Returns:
             Scene name if found, None if no configuration exists
         """
-        # First check game-specific configuration
-        if game in self.scenes and state in self.scenes[game]:
-            return self.scenes[game][state]
+        # [scenes.GAME]
+        if game in self.scenes:
+            # [scenes.GAME.STATE]
+            if state in self.scenes[game]:
+                return self.scenes[game][state]
+            # [scenes.GAME.Default]
+            if "Default" in self.scenes[game]:
+                return self.scenes[game]["Default"]
 
-        # Fall back to default configuration for state if it exists
+        # [scenes.Default.STATE]
         if state in self.scenes["Default"]:
             return self.scenes["Default"][state]
 
-        # Fall back to default scene if it exists
-        if "Default" in self.scenes:
+        # [scenes.Default.Default]
+        if "Default" in self.scenes["Default"]:
             return self.scenes["Default"]["Default"]
 
         return None
