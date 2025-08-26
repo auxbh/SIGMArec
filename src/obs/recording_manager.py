@@ -91,8 +91,7 @@ class RecordingManager(IRecordingManager):
             self._create_lastplay_thumbnail(lastplay_path)
 
         logging.info(
-            "[Recording] Recording renamed to lastplay: %s",
-            lastplay_path.name,
+            "Recording renamed to lastplay",
         )
 
         self.sound_service.play_ready()
@@ -129,9 +128,7 @@ class RecordingManager(IRecordingManager):
         if self._current_thumbnail_path and self._current_thumbnail_path.exists():
             self._organize_thumbnail(final_path)
 
-        logging.info("[Recording] Lastplay saved: %s", final_path)
-
-        return True, f"Saved as {new_filename} in {target_dir.name}/"
+        return True, target_dir.name, new_filename
 
     def has_lastplay(self) -> bool:
         """
