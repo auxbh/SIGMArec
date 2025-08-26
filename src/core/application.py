@@ -121,6 +121,10 @@ class Application:
 
         detection_engine: IDetectionEngine = self.container.get("IDetectionEngine")
 
+        sound_service = None
+        if self.container.has("SoundService"):
+            sound_service = self.container.get("SoundService")
+
         if not detection_engine.can_save_lastplay():
             status = detection_engine.get_current_status()
             if not status.get("can_save_lastplay", False):
@@ -128,22 +132,20 @@ class Application:
                     logging.info("[Application] Cannot save while recording")
                 else:
                     logging.info("[Application] No lastplay available to save")
-
-            if self.container.has("SoundService"):
-                sound_service = self.container.get("SoundService")
-                sound_service.play_failed()
+                if sound_service:
+                    sound_service.play_failed()
             return
 
-        success, message = detection_engine.save_current_lastplay()
+        success, target_dir, filename = detection_engine.save_current_lastplay()
 
-        if self.container.has("SoundService"):
-            sound_service = self.container.get("SoundService")
-            if success:
+        if success:
+            logging.info("Lastplay saved to '%s/%s'", target_dir, filename)
+            if sound_service:
                 sound_service.play_saved()
-                logging.info("[Application] Lastplay saved: %s", message)
-            else:
+        else:
+            logging.error("Failed to save lastplay")
+            if sound_service:
                 sound_service.play_failed()
-                logging.error("[Application] Failed to save lastplay: %s", message)
 
     def _setup_logging(self) -> None:
         """Configure application logging."""
