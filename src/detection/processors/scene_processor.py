@@ -36,32 +36,13 @@ class SceneProcessor:
             return
 
         game_shortname = transition.game.shortname
+        current_scene = self.obs.get_current_scene()
         scene_name = self.settings.get_scene_name(game_shortname, transition.to_state)
 
         if scene_name:
-            current_scene = self.obs.get_current_scene()
             if current_scene != scene_name:
                 self.obs.set_current_scene(scene_name)
                 self._last_scene_change_time = time.time()
-                logging.debug(
-                    "[SceneProcessor] [%s] Scene switched for state '%s' → '%s'",
-                    transition.game.name,
-                    transition.to_state,
-                    scene_name,
-                )
-            else:
-                logging.debug(
-                    "[SceneProcessor] [%s] Already on correct scene '%s' for state '%s'",
-                    transition.game.name,
-                    scene_name,
-                    transition.to_state,
-                )
-        else:
-            logging.debug(
-                "[SceneProcessor] No scene mapping for %s:%s",
-                game_shortname,
-                transition.to_state,
-            )
 
     def process_game_change(self, game) -> None:
         """
@@ -77,7 +58,6 @@ class SceneProcessor:
                 if current_scene != default_scene:
                     self.obs.set_current_scene(default_scene)
                     self._last_scene_change_time = time.time()
-                    logging.debug("[SceneProcessor] Switched to default scene")
 
     def get_recording_delay_remaining(self) -> float:
         """
