@@ -112,7 +112,6 @@ class DetectionCoordinator(IDetectionEngine):
         # Process state changes
         state_transition = self.state_manager.update_state(detected_state)
         if state_transition:
-            self.video_processor.process_transition(state_transition)
             self.scene_processor.process_transition(state_transition)
             self.recording_processor.process_transition(state_transition)
 
