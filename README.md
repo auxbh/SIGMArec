@@ -1,7 +1,7 @@
 <!-- Shields -->
 [version-shield]: https://img.shields.io/github/v/release/NotAkitake/SIGMArec?color=f0c6c6
 [version-url]: https://github.com/NotAkitake/SIGMArec/releases
-[downloads-shield]: https://img.shields.io/github/downloads/NotAkitake/SIGMArec/total.svg?color=c6a0f6
+[downloads-shield]: https://img.shields.io/github/downloads/NotAkitake/SIGMArec/total?color=c6a0f6
 [downloads-url]: https://github.com/NotAkitake/SIGMArec/releases
 [license-shield]: https://img.shields.io/github/license/NotAkitake/SIGMArec?color=f5bde6
 [license-url]: https://github.com/NotAkitake/SIGMArec/blob/main/LICENSE
