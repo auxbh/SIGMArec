@@ -149,8 +149,7 @@ class Application:
 
     def _setup_logging(self) -> None:
         """Configure application logging."""
-        script_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
-        log_file_path = os.path.join(script_dir, "SIGMArec.log")
+        log_file_path = os.path.join(".", "SIGMArec.log")
 
         logging.basicConfig(
             level=logging.INFO,
