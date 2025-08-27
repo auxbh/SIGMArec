@@ -5,9 +5,9 @@ Handles OBS scene switching based on game states.
 import logging
 import time
 
-from core.interfaces.obs import IOBSController
-from core.interfaces.detection import StateTransition
-from config.settings import AppSettings
+from src.core.interfaces.obs import IOBSController
+from src.core.interfaces.detection import StateTransition
+from src.config.settings import AppSettings
 
 
 class SceneProcessor:

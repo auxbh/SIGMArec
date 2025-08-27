@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
-from games import Game
+from src.games import Game
 
 
 class IRecordingStorage(ABC):

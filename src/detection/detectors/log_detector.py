@@ -5,9 +5,9 @@ Log-based state detection for Java games that write to log files.
 import logging
 from typing import Optional
 
-from detection.detectors.base import BaseStateDetector
-from detection.log_service import LogService
-from games import Game, LogGame
+from src.detection.detectors.base import BaseStateDetector
+from src.detection.log_service import LogService
+from src.games import Game, LogGame
 
 
 class LogStateDetector(BaseStateDetector):
