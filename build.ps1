@@ -1,3 +1,11 @@
+# Check if SIGMArec is currently running and close it
+$sigmarecProcess = Get-Process -Name "SIGMArec" -ErrorAction SilentlyContinue
+if ($sigmarecProcess) {
+    Write-Host "SIGMArec is currently running. Closing it..." -ForegroundColor Yellow
+    Stop-Process -Name "SIGMArec" -Force
+    Start-Sleep -Seconds 2
+}
+
 # Delete release folder if it already exists
 if (Test-Path "release") {
     Remove-Item -Recurse -Force "release"
