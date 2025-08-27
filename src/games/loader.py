@@ -9,7 +9,7 @@ import json
 from pathlib import Path
 from typing import Any, Dict, List
 
-from defaults import DEFAULT_GAMES
+from src.defaults import DEFAULT_GAMES
 
 from .objects import GameType
 

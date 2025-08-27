@@ -6,17 +6,17 @@ import logging
 import time
 from typing import Any, Dict, List, Tuple
 
-from config import AppSettings
-from core.interfaces import (
+from src.config import AppSettings
+from src.core.interfaces import (
     DetectionResult,
     IDetectionEngine,
     IOBSController,
     IRecordingManager,
 )
-from detection.detectors import GameDetector, LogStateDetector, PixelStateDetector
-from detection.engine.state_manager import StateManager
-from detection.processors import RecordingProcessor, SceneProcessor, VideoProcessor
-from games import Game
+from src.detection.detectors import GameDetector, LogStateDetector, PixelStateDetector
+from src.detection.engine.state_manager import StateManager
+from src.detection.processors import RecordingProcessor, SceneProcessor, VideoProcessor
+from src.games import Game
 
 
 class DetectionCoordinator(IDetectionEngine):

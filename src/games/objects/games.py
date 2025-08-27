@@ -81,7 +81,7 @@ class LogGame(Game):
 
     @classmethod
     def from_config(cls, name: str, config: Dict) -> "LogGame":
-        """Create a LogGame from configuration data."""
+        """Create a LogGame from src.configuration data."""
         processes = [
             ProcessInfo(exe=proc.get("exe", ""), title=proc.get("title", ""))
             for proc in config.get("processes", [])
@@ -131,7 +131,7 @@ class PixelGame(Game):
 
     @classmethod
     def from_config(cls, name: str, config: Dict) -> "PixelGame":
-        """Create a PixelGame from configuration data."""
+        """Create a PixelGame from src.configuration data."""
         processes = [
             ProcessInfo(exe=proc.get("exe", ""), title=proc.get("title", ""))
             for proc in config.get("processes", [])

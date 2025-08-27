@@ -7,10 +7,10 @@ import time
 from dataclasses import dataclass, field
 from typing import Optional
 
-from core.interfaces import StateTransition
-from detection.log_service import LogService
-from detection.state_machine import StateMachine, TransitionPattern
-from games import Game, LogGame
+from src.core.interfaces import StateTransition
+from src.detection.log_service import LogService
+from src.detection.state_machine import StateMachine, TransitionPattern
+from src.games import Game, LogGame
 
 
 @dataclass

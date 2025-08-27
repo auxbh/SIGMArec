@@ -23,7 +23,7 @@ class Pattern(ABC):
     @classmethod
     @abstractmethod
     def from_config(cls, config: Dict, **kwargs):
-        """Create a pattern from configuration data."""
+        """Create a pattern from src.configuration data."""
 
 
 class State(ABC):
@@ -66,7 +66,7 @@ class Game(ABC):
     @classmethod
     @abstractmethod
     def from_config(cls, name: str, config: Dict) -> "Game":
-        """Create a Game from configuration data."""
+        """Create a Game from src.configuration data."""
 
     def is_process_running(self, process_name: str, window_title: str = "") -> bool:
         """Check if any of the game's processes are running."""

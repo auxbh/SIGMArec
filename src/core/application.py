@@ -10,8 +10,8 @@ import time
 from typing import Optional
 
 import keyboard
-from config import AppSettings
-from core.interfaces import IDetectionEngine
+from src.config import AppSettings
+from src.core.interfaces import IDetectionEngine
 from src import __version__
 
 from .container import Container

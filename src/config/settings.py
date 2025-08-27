@@ -1,6 +1,6 @@
 """
 Application configuration handling.
-This module handles loading and managing application settings from config.toml.
+This module handles loading and managing application settings from src.config.toml.
 """
 
 import re
@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 import toml
-from defaults import DEFAULT_CONFIG
+from src.defaults import DEFAULT_CONFIG
 
 
 class ConfigurationError(Exception):
@@ -392,7 +392,7 @@ class AppSettings:
         if self.video is None:
             self.video = {}
 
-    def get_scene_name(self, game: str, state: str) -> Optional[str]:
+    def get_scene_name(self, state: str = "", game: str = "") -> Optional[str]:
         """
         Get scene name for a specific game and state with fallback to defaults.
 
@@ -478,7 +478,7 @@ class ConfigManager:
 
     def load_settings(self) -> AppSettings:
         """
-        Load application settings from config file.
+        Load application settings from src.config file.
 
         Returns:
             AppSettings object with loaded or default settings

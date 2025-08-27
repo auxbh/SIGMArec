@@ -8,10 +8,10 @@ import threading
 import time
 from pathlib import Path
 
-from audio import SoundService
-from config.settings import AppSettings
-from core.interfaces.detection import StateTransition
-from core.interfaces.obs import IOBSController
+from src.audio import SoundService
+from src.config.settings import AppSettings
+from src.core.interfaces.detection import StateTransition
+from src.core.interfaces.obs import IOBSController
 
 from .scene_processor import SceneProcessor
 

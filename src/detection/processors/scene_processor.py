@@ -5,9 +5,9 @@ Handles OBS scene switching based on game states.
 import logging
 import time
 
-from core.interfaces.obs import IOBSController
-from core.interfaces.detection import StateTransition
-from config.settings import AppSettings
+from src.core.interfaces.obs import IOBSController
+from src.core.interfaces.detection import StateTransition
+from src.config.settings import AppSettings
 
 
 class SceneProcessor:
@@ -52,7 +52,7 @@ class SceneProcessor:
             game: New focused game or None if no game focused
         """
         if game is None:
-            default_scene = self.settings.get_scene_name("", "Default")
+            default_scene = self.settings.get_scene_name()
             if default_scene:
                 current_scene = self.obs.get_current_scene()
                 if current_scene != default_scene:

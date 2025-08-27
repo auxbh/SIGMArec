@@ -5,9 +5,9 @@ Pixel-based state detection for games that use screen analysis.
 import logging
 from typing import Optional
 
-from detection.detectors.base import BaseStateDetector
-from detection.screen_capture import ScreenCaptureService
-from games import Game, PixelGame
+from src.detection.detectors.base import BaseStateDetector
+from src.detection.screen_capture import ScreenCaptureService
+from src.games import Game, PixelGame
 
 
 class PixelStateDetector(BaseStateDetector):

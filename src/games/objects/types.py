@@ -21,8 +21,8 @@ class Detectable(Protocol):
 
 
 class Parseable(Protocol):
-    """Protocol for objects that can be parsed from configuration."""
+    """Protocol for objects that can be parsed from src.configuration."""
 
     @classmethod
     def from_config(cls, config: Dict[str, Any], **kwargs):
-        """Create an instance from configuration data."""
+        """Create an instance from src.configuration data."""

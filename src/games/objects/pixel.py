@@ -36,7 +36,7 @@ class Pixel:
 
     @classmethod
     def from_config(cls, pixel_data: List[int]) -> "Pixel":
-        """Create a Pixel from configuration data."""
+        """Create a Pixel from src.configuration data."""
         if len(pixel_data) < 6:
             raise ValueError(
                 f"Pixel data must have at least 6 elements, got {len(pixel_data)}"
@@ -108,7 +108,7 @@ class PixelPattern(Pattern):
 
     @classmethod
     def from_config(cls, config: Dict, **kwargs) -> "PixelPattern":
-        """Create a PixelPattern from configuration data."""
+        """Create a PixelPattern from src.configuration data."""
         pixels = [
             Pixel.from_config(pixel_data) for pixel_data in config.get("pixels", [])
         ]
@@ -158,7 +158,7 @@ class PixelState(State):
 
     @classmethod
     def from_config(cls, name: str, config: Dict) -> "PixelState":
-        """Create a PixelState from configuration data."""
+        """Create a PixelState from src.configuration data."""
         patterns = [
             PixelPattern.from_config(pattern_config)
             for pattern_config in config.get("patterns", [])

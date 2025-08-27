@@ -5,8 +5,8 @@ Base state detector implementation.
 from abc import abstractmethod
 from typing import Optional
 
-from core.interfaces import IStateDetector
-from games import Game
+from src.core.interfaces import IStateDetector
+from src.games import Game
 
 
 class BaseStateDetector(IStateDetector):

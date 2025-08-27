@@ -13,11 +13,11 @@ from typing import Optional, Tuple
 
 import mss.tools
 
-from audio import SoundService
-from config.settings import AppSettings
-from core.interfaces.recording import IRecordingManager
-from detection.screen_capture import ScreenCaptureService
-from games.objects import Game
+from src.audio import SoundService
+from src.config.settings import AppSettings
+from src.core.interfaces.recording import IRecordingManager
+from src.detection.screen_capture import ScreenCaptureService
+from src.games.objects import Game
 
 
 class RecordingManager(IRecordingManager):
