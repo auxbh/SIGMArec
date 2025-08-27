@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 import toml
+from defaults import DEFAULT_CONFIG
 
 
 class ConfigurationError(Exception):
@@ -485,9 +486,10 @@ class ConfigManager:
             return self._settings
 
         if not self.config_path.exists():
-            self._settings = AppSettings()
-            self.save_settings(self._settings)
-            return self._settings
+            self.config_path.parent.mkdir(parents=True, exist_ok=True)
+
+            with open(self.config_path, "w", encoding="utf-8") as f:
+                f.write(DEFAULT_CONFIG)
 
         try:
             with open(self.config_path, "r", encoding="utf-8") as f:
