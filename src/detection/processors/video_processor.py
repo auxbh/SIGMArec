@@ -2,8 +2,8 @@
 Handles OBS scene switching based on game states.
 """
 
-from config.settings import AppSettings
-from core.interfaces.obs import IOBSController
+from src.config.settings import AppSettings
+from src.core.interfaces.obs import IOBSController
 
 
 class VideoProcessor:

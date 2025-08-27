@@ -1,14 +1,17 @@
 """
 Application configuration handling.
-This module handles loading and managing application settings from config.toml.
+This module handles loading and managing application settings from src.config.toml.
 """
 
+import logging
 import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Optional
 
 import toml
+
+from src.defaults import DEFAULT_CONFIG
 
 
 class ConfigurationError(Exception):
@@ -391,7 +394,7 @@ class AppSettings:
         if self.video is None:
             self.video = {}
 
-    def get_scene_name(self, game: str, state: str) -> Optional[str]:
+    def get_scene_name(self, state: str = "", game: str = "") -> Optional[str]:
         """
         Get scene name for a specific game and state with fallback to defaults.
 
@@ -411,13 +414,14 @@ class AppSettings:
             if "Default" in self.scenes[game]:
                 return self.scenes[game]["Default"]
 
-        # [scenes.Default.STATE]
-        if state in self.scenes["Default"]:
-            return self.scenes["Default"][state]
-
-        # [scenes.Default.Default]
-        if "Default" in self.scenes["Default"]:
-            return self.scenes["Default"]["Default"]
+        # [scenes.STATE]
+        if "Default" in self.scenes:
+            # [scenes.Default.STATE]
+            if state in self.scenes["Default"]:
+                return self.scenes["Default"][state]
+            # [scenes.Default.Default]
+            if "Default" in self.scenes["Default"]:
+                return self.scenes["Default"]["Default"]
 
         return None
 
@@ -476,7 +480,7 @@ class ConfigManager:
 
     def load_settings(self) -> AppSettings:
         """
-        Load application settings from config file.
+        Load application settings from src.config file.
 
         Returns:
             AppSettings object with loaded or default settings
@@ -485,15 +489,20 @@ class ConfigManager:
             return self._settings
 
         if not self.config_path.exists():
-            self._settings = AppSettings()
-            self.save_settings(self._settings)
-            return self._settings
+            logging.debug("[Settings] Config missing, creating default config file")
+            self.config_path.parent.mkdir(parents=True, exist_ok=True)
+
+            with open(self.config_path, "w", encoding="utf-8") as f:
+                f.write(DEFAULT_CONFIG)
+
+        logging.debug("[Settings] Loading config from '%s'", self.config_path)
 
         try:
             with open(self.config_path, "r", encoding="utf-8") as f:
                 config_data = toml.load(f)
 
             self._settings = self._parse_config_data(config_data)
+            logging.debug("[Settings] Config loaded")
             return self._settings
 
         except Exception as e:
@@ -520,20 +529,6 @@ class ConfigManager:
             raise ConfigurationError(
                 f"Error saving configuration to {self.config_path}: {e}"
             ) from e
-
-    def get_setting(self, key: str, default=None):
-        """Get a specific setting value."""
-        settings = self.load_settings()
-        return getattr(settings, key, default)
-
-    def update_setting(self, key: str, value: Any) -> None:
-        """Update a specific setting and save."""
-        settings = self.load_settings()
-        if hasattr(settings, key):
-            setattr(settings, key, value)
-            self.save_settings(settings)
-        else:
-            raise ValueError(f"Unknown setting: {key}")
 
     def _parse_config_data(self, config_data: Dict[str, Any]) -> AppSettings:
         """Parse and validate configuration data into AppSettings object."""

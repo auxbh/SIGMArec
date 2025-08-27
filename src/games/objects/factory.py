@@ -1,8 +1,8 @@
 """
-Factory classes for creating SIGMArec objects from configuration.
+Factory classes for creating SIGMArec objects from src.configuration.
 
 This module implements the Factory pattern to create games and related objects
-from configuration data, following proper separation of concerns.
+from src.configuration data, following proper separation of concerns.
 """
 
 from typing import Any, Dict, List
@@ -18,7 +18,7 @@ class ProcessFactory:
 
     @staticmethod
     def create_from_config(process_config: Dict[str, Any]) -> ProcessInfo:
-        """Create a ProcessInfo from configuration data."""
+        """Create a ProcessInfo from src.configuration data."""
         return ProcessInfo(
             exe=process_config.get("exe", ""), title=process_config.get("title", "")
         )
@@ -27,7 +27,7 @@ class ProcessFactory:
     def create_list_from_config(
         processes_config: List[Dict[str, Any]],
     ) -> List[ProcessInfo]:
-        """Create a list of ProcessInfo objects from configuration data."""
+        """Create a list of ProcessInfo objects from src.configuration data."""
         return [
             ProcessFactory.create_from_config(proc_config)
             for proc_config in processes_config
@@ -35,14 +35,14 @@ class ProcessFactory:
 
 
 class GameFactory:
-    """Factory for creating Game objects from configuration."""
+    """Factory for creating Game objects from src.configuration."""
 
     _game_types = {GameType.LOG.value: LogGame, GameType.PIXEL.value: PixelGame}
 
     @classmethod
     def create_game(cls, name: str, config: Dict[str, Any]) -> Game:
         """
-        Create a Game object from configuration data.
+        Create a Game object from src.configuration data.
 
         Args:
             name: The name of the game

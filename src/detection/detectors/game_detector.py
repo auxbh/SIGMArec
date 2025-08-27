@@ -8,16 +8,20 @@ import psutil
 import win32gui
 import win32process
 
-from core.interfaces import IGameDetector
-from detection.log_service import LogService
-from detection.screen_capture import ScreenCaptureService
-from games import Game, LogGame, PixelGame, ProcessInfo
+from src.core.interfaces import IGameDetector
+from src.detection.log_service import LogService
+from src.detection.screen_capture import ScreenCaptureService
+from src.games import Game, LogGame, PixelGame, ProcessInfo
 
 
 class GameDetector(IGameDetector):
     """Detects which game is currently active/focused."""
 
-    def __init__(self, games: List[Game]):
+    def __init__(
+        self,
+        games: List[Game],
+        screen_capture_service: ScreenCaptureService,
+    ):
         """
         Initialize game detector.
 
@@ -25,7 +29,7 @@ class GameDetector(IGameDetector):
             games: List of games to detect
         """
         self.games = games
-        self.screen = ScreenCaptureService()
+        self.screen = screen_capture_service
         self.logs = LogService()
 
     def get_active_game(self) -> Optional[Game]:

@@ -6,17 +6,17 @@ import logging
 import time
 from typing import Any, Dict, List, Tuple
 
-from config import AppSettings
-from core.interfaces import (
+from src.config import AppSettings
+from src.core.interfaces import (
     DetectionResult,
     IDetectionEngine,
     IOBSController,
     IRecordingManager,
 )
-from detection.detectors import GameDetector, LogStateDetector, PixelStateDetector
-from detection.engine.state_manager import StateManager
-from detection.processors import RecordingProcessor, SceneProcessor, VideoProcessor
-from games import Game
+from src.detection.detectors import GameDetector, LogStateDetector, PixelStateDetector
+from src.detection.engine.state_manager import StateManager
+from src.detection.processors import RecordingProcessor, SceneProcessor, VideoProcessor
+from src.games import Game
 
 
 class DetectionCoordinator(IDetectionEngine):
@@ -33,6 +33,7 @@ class DetectionCoordinator(IDetectionEngine):
         recording_manager: IRecordingManager,
         games: List[Game],
         settings: AppSettings,
+        game_detector: GameDetector,
         video_processor: VideoProcessor,
         scene_processor: SceneProcessor,
         recording_processor: RecordingProcessor,
@@ -45,6 +46,7 @@ class DetectionCoordinator(IDetectionEngine):
             recording_manager: Recording manager interface
             games: List of games to detect
             settings: Application settings
+            game_detector: Game detector
             scene_processor: Scene processor
             recording_processor: Recording processor
         """
@@ -53,7 +55,7 @@ class DetectionCoordinator(IDetectionEngine):
         self.settings = settings
 
         self.state_manager = StateManager()
-        self.game_detector = GameDetector(games)
+        self.game_detector = game_detector
         self.pixel_detector = PixelStateDetector(settings.detections_required)
         self.log_detector = LogStateDetector(settings.detections_required)
         self.video_processor = video_processor
@@ -79,9 +81,7 @@ class DetectionCoordinator(IDetectionEngine):
         self.state_manager.update_game(active_game)
         if active_game != previous_game:
             if previous_game and not active_game and self.obs.recording_active:
-                logging.debug(
-                    "[DetectionCoordinator] Game exited while recording, stopping and deleting"
-                )
+                logging.debug("Game exited while recording, stopping and deleting")
                 self.recording_processor.mark_for_deletion()
                 self.recording_processor.stop_recording_immediate(play_failed=True)
 

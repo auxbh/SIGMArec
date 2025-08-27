@@ -3,7 +3,9 @@
 temp/
 
 ## Local config
+assets/config.toml
 config.toml
+games.json
 
 ## Pyinstaller build
 build/

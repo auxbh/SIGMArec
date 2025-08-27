@@ -12,9 +12,9 @@ from typing import Callable, List, Optional
 
 import obsws_python as obsws
 
-from config.settings import AppSettings
-from core.interfaces.obs import IOBSController, IOBSEventHandler
-from obs.videosettings import OBSVideoSettings
+from src.config.settings import AppSettings
+from src.core.interfaces.obs import IOBSController, IOBSEventHandler
+from src.obs.videosettings import OBSVideoSettings
 
 
 @contextmanager

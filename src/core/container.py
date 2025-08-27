@@ -6,12 +6,12 @@ import logging
 from dataclasses import dataclass
 from typing import Any, Dict
 
-from audio import SoundService
-from config import ConfigManager
-from detection.engine import DetectionCoordinator
-from detection.processors.recording_processor import RecordingProcessor
-from detection.processors.scene_processor import SceneProcessor
-from games import GameRepository
+from src.audio import SoundService
+from src.config import ConfigManager
+from src.detection.engine import DetectionCoordinator
+from src.detection.processors.recording_processor import RecordingProcessor
+from src.detection.processors.scene_processor import SceneProcessor
+from src.games import GameRepository
 
 
 @dataclass
@@ -97,20 +97,36 @@ class Container:
         sound_service = SoundService(settings)
         self.register_singleton("SoundService", sound_service)
 
-        # Step 4: Initialize recording manager
-        from obs import RecordingManager
+        # Step 4: Initialize screen capture service
+        from src.detection.screen_capture import ScreenCaptureService
 
-        recording_manager = RecordingManager(settings, sound_service=sound_service)
-        self.register_singleton("IRecordingManager", recording_manager)
+        screen_capture_service = ScreenCaptureService()
+        self.register_singleton("ScreenCaptureService", screen_capture_service)
 
-        # Step 5: Initialize OBS controller
-        from obs import OBSController
+        # Step 5: Initialize game detector
+        from src.detection.detectors.game_detector import GameDetector
+
+        game_detector = GameDetector(games, screen_capture_service)
+        self.register_singleton("GameDetector", game_detector)
+
+        # Step 6: Initialize OBS controller
+        from src.obs import OBSController
 
         obs_controller = OBSController.connect(settings)
         self.register_singleton("IOBSController", obs_controller)
 
-        # Step 6: Initialize processors
-        from detection.processors.video_processor import VideoProcessor
+        # Step 7: Initialize recording manager
+        from src.obs import RecordingManager
+
+        recording_manager = RecordingManager(
+            settings=settings,
+            sound_service=sound_service,
+            screen=screen_capture_service,
+        )
+        self.register_singleton("IRecordingManager", recording_manager)
+
+        # Step 8: Initialize processors
+        from src.detection.processors.video_processor import VideoProcessor
 
         video_processor = VideoProcessor(obs_controller, settings)
         self.register_singleton("VideoProcessor", video_processor)
@@ -121,12 +137,13 @@ class Container:
         )
         self.register_singleton("RecordingProcessor", recording_processor)
 
-        # Step 7: Initialize detection engine
+        # Step 9: Initialize detection engine
         detection_engine = DetectionCoordinator(
             obs_controller=obs_controller,
             recording_manager=recording_manager,
             games=games,
             settings=settings,
+            game_detector=game_detector,
             video_processor=video_processor,
             scene_processor=scene_processor,
             recording_processor=recording_processor,
@@ -138,7 +155,7 @@ class Container:
 
     def cleanup(self) -> None:
         """Clean up all registered services."""
-        logging.info("[Container] Cleaning up services")
+        logging.info("Cleaning up services")
 
         # Run cleanup or shutdown in reverse order from singleton registration
         for service_name in reversed(list(self._singletons.keys())):

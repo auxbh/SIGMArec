@@ -38,7 +38,7 @@ class LogPattern(Pattern):
 
     @classmethod
     def from_config(cls, config: Dict, **kwargs) -> "LogPattern":
-        """Create a LogPattern from configuration data."""
+        """Create a LogPattern from src.configuration data."""
         return cls(
             class_name=config.get("class", ""),
             method_name=config.get("method", ""),
@@ -100,7 +100,7 @@ class LogState(State):
 
     @classmethod
     def from_config(cls, name: str, config: Dict) -> "LogState":
-        """Create a LogState from configuration data."""
+        """Create a LogState from src.configuration data."""
         patterns = [
             LogPattern.from_config(pattern_config)
             for pattern_config in config.get("patterns", [])

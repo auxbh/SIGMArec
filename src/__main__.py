@@ -6,7 +6,7 @@ import ctypes
 import sys
 
 from src import __version__
-from core.application import Application
+from src.core.application import Application
 
 
 def main():

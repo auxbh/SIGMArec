@@ -1,4 +1,8 @@
-{
+"""
+Default config.toml and games.json
+"""
+
+DEFAULT_GAMES = """{
   "beatmania IIDX INFINITAS": {
     "type": "pixel",
     "processes": [
@@ -347,247 +351,6 @@
       }
     }
   },
-
-  "Dance Dance Revolution A3 (Gold Cab mode)": {
-    "type": "pixel",
-    "processes": [
-      {
-        "exe": "spice.exe",
-        "title": "Dance Dance Revolution"
-      },
-      {
-        "exe": "spice64.exe",
-        "title": "Dance Dance Revolution"
-      }
-    ],
-    "shortname": "DDRA3Gold",
-    "states": {
-      "Select": {
-        "patterns": [
-          {
-            "description": "Description",
-            "resolution": [
-              1280,
-              720
-            ],
-            "pixels": [
-              [
-                912,
-                186,
-                239,
-                203,
-                74,
-                0,
-                0
-              ]
-            ]
-          }
-        ]
-      },
-      "Playing": {
-        "patterns": [
-          {
-            "description": "Description",
-            "resolution": [
-              1280,
-              720
-            ],
-            "pixels": [
-              [
-                639,
-                66,
-                224,
-                196,
-                31,
-                0,
-                0
-              ]
-            ]
-          }
-        ]
-      },
-      "Result": {
-        "patterns": [
-          {
-            "description": "P1",
-            "resolution": [
-              1280,
-              720
-            ],
-            "pixels": [
-              [
-                90,
-                106,
-                239,
-                215,
-                49, 
-                0,
-                0
-              ],
-              [
-                696,
-                336,
-                8,
-                146,
-                222,
-                0,
-                0
-              ]
-            ]
-          },
-          {
-            "description": "P2",
-            "resolution": [
-              1280,
-              720
-            ],
-            "pixels": [
-              [
-                1209,
-                106,
-                239,
-                215,
-                49,
-                0,
-                0
-              ],
-              [
-                696,
-                336,
-                8,
-                146,
-                222,
-                0,
-                0
-              ]
-            ]
-          }
-        ]
-      }
-    }
-  },
-
-  "Dance Dance Revolution WORLD": {
-    "type": "pixel",
-    "processes": [
-      {
-        "exe": "spice.exe",
-        "title": "Dance Dance Revolution"
-      },
-      {
-        "exe": "spice64.exe",
-        "title": "Dance Dance Revolution"
-      }
-    ],
-    "shortname": "DDRWORLD",
-    "states": {
-      "Select": {
-        "patterns": [
-          {
-            "description": "P1",
-            "resolution": [
-              1280,
-              720
-            ],
-            "pixels": [
-              [
-                1017,
-                19,
-                239,
-                215,
-                49,
-                0
-              ],
-              [
-                358,
-                364,
-                39,
-                40,
-                40,
-                0
-              ]
-            ]
-          },
-          {
-            "description": "P2",
-            "resolution": [
-              1280,
-              720
-            ],
-            "pixels": [
-              [
-                1017,
-                19,
-                239,
-                215,
-                49,
-                0
-              ],
-              [
-                1256,
-                364,
-                39,
-                40,
-                40,
-                0
-              ]
-            ]
-          }
-        ]
-      },
-      "Playing": {
-        "patterns": [
-          {
-            "description": "Top text",
-            "resolution": [
-              1280,
-              720
-            ],
-            "pixels": [
-              [
-                681,
-                10,
-                67,
-                63,
-                63,
-                0
-              ]
-            ]
-          }
-        ]
-      },
-      "Result": {
-        "patterns": [
-          {
-            "description": "Result text",
-            "resolution": [
-              1280,
-              720
-            ],
-            "pixels": [
-              [
-                338,
-                463,
-                0,
-                255,
-                186,
-                0
-              ],
-              [
-                742,
-                360,
-                114,
-                114,
-                114,
-                0
-              ]
-            ]
-          }
-        ]
-      }
-    }
-  },
-
   "Sound Voltex: Exceed Gear": {
     "type": "pixel",
     "processes": [
@@ -686,3 +449,92 @@
     }
   }
 }
+"""
+
+DEFAULT_CONFIG = """[input]
+save_key = "ctrl+space" # Keyboard key(s) to trigger recording save (allows for multiple keys like 'ctrl+shift+s')
+debug = false # Enable detailed logging and debug output
+
+[obs]   
+host = "localhost" # OBS WebSocket server address
+port = 4455 # OBS WebSocket server port
+password = "YOUR_PASSWORD" # OBS WebSocket authentication password
+timeout = 3 # Connection timeout in seconds
+
+[audio]
+start = "./sounds/start.wav" # Sound file played when recording begins
+ready = "./sounds/ready.wav" # Sound file played when ready to save
+saved = "./sounds/saved.wav" # Sound file played after successful save
+failed = "./sounds/failed.wav" # Sound file played when save operation fails or is aborted
+
+[detection] 
+interval = 0.25 # Seconds between game state detection checks
+detections_required = 2 # Consecutive matching detections needed to confirm state change
+
+[recording]
+result_wait = 1.5 # Seconds to display result screen before stopping
+organize_by_game = true # Create separate folders for each detected game
+save_thumbnails = true # Generate thumbnail images when recordings end
+scene_change_delay = 0.3 # Delay in seconds before recording can start after scene change (should match your OBS scene transition duration)
+
+[scenes] 
+# Optional: Automatically switch OBS scenes based on detected game state
+# 
+# Switch scenes when SIGMArec detects game state changes (playing, results, menus).
+#
+# Configuration format:
+#   [scenes]                    # Default fallbacks
+#   Default = "Scene Name"      # Used when no game-specific scene is defined
+#
+#   [scenes.GAME_SHORTNAME]     # Game-specific settings
+#   GameState = "Scene Name"
+#
+# Available games: BMS, IIDX31, IIDX32, IIDXINF, SDVXEAC, SDVXEG
+# Available states: Default, Playing, Result, Select
+#
+# Examples:
+#   [scenes]
+#   Default = "Fullscreen"      # Fallback for all undefined scenes
+#   
+#   [scenes.BMS]
+#   Playing = "BMS Handcam"     # BMS uses this while playing, "Fullscreen" for other states
+#
+#   [scenes.IIDX31]
+#   Playing = "IIDX Handcam"
+#   Result = "Results View"
+#   Select = "Song Select"      # Complete configuration, no fallbacks needed
+
+[video]
+# Optional: Automatically adjust OBS video settings based on detected game
+# 
+# Change canvas resolution, output resolution, and frame rate when specific games are detected.
+#
+# Configuration format:
+#   [video]                     # Default fallbacks
+#   Base = "1920x1080"          # Default canvas for all games
+#   Output = "1280x720"         # Default output for all games
+#   FPS = 60                    # Default FPS for all games
+#
+#   [video.GAME_SHORTNAME]      # Game-specific settings
+#   Base = "widthxheight"       # Canvas resolution
+#   Output = "widthxheight"     # Output resolution  
+#   FPS = number                # Frame rate
+#
+# Available games: BMS, IIDX31, IIDX32, IIDXINF, SDVXEAC, SDVXEG
+#
+# Examples:
+#   [video]
+#   Base = "1920x1080"          # Defaults for all games
+#   Output = "1280x720"
+#   FPS = 60
+#   
+#   [video.BMS]
+#   FPS = 120                   # Higher FPS for BMS, inherits default resolutions
+#
+#   [video.IIDX31]
+#   Base = "2560x1440"          # Full configuration for IIDX
+#   Output = "1280x720"
+#   FPS = 120
+#
+# Note: Game-specific settings override defaults. Unspecified settings preserve existing OBS values.
+"""

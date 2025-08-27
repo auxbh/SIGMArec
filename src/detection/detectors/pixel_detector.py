@@ -5,17 +5,21 @@ Pixel-based state detection for games that use screen analysis.
 import logging
 from typing import Optional
 
-from detection.detectors.base import BaseStateDetector
-from detection.screen_capture import ScreenCaptureService
-from games import Game, PixelGame
+from src.detection.detectors.base import BaseStateDetector
+from src.detection.screen_capture import ScreenCaptureService
+from src.games import Game, PixelGame
 
 
 class PixelStateDetector(BaseStateDetector):
     """Detector for pixel-based game state detection."""
 
-    def __init__(self, detection_threshold: int = 2):
+    def __init__(
+        self,
+        detection_threshold: int = 2,
+        screen_capture_service: ScreenCaptureService = None,
+    ):
         super().__init__(detection_threshold)
-        self.screen = ScreenCaptureService()
+        self.screen = screen_capture_service
 
     def can_handle_game(self, game: Game) -> bool:
         """Check if this detector can handle pixel-based games."""

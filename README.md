@@ -93,7 +93,7 @@ Then **play** any supported game. SIGMArec should now detect and record your gam
 3. Set a **Server Password** and click Apply
 4. Note the port number *(default: 4455)*
 
-*Note: Without a manually set password, OBS generates a new one on each launch, so you’d need to update your config each time.*
+> *Without a manually set password, OBS generates a new one on each launch, so you’d need to update your config each time.*
 
 ### config.toml
 The `example.config.toml` file should contain all you need to know for each option.  
@@ -119,16 +119,21 @@ For IIDX, default frame skin must be used.
 - **beatoraja**
 - **LR2oraja**
 
-## :hammer: Build from source
+## :hammer: Run / Build from source
 
 ### Requirements
 
 - Windows w/ PowerShell
 - Latest python (and pip)
 
-### Process
+1. **Clone** the repository
+2. **Navigate** to the project directory in your terminal of choice
 
-- Clone the project
-- Open a terminal in the project directory
-- Run `build.ps1`
-- The `release` folder will contain all files included in a typical release archive.
+### Running from Source
+- Execute `run.ps1` to start SIGMArec from source
+
+> *Run from an elevated terminal if you want your hotkeys to work in games running with administrator privileges.*
+
+### Building the Application
+- Execute `build.ps1` to create a standalone build
+- Find the compiled application and all dependencies in the `release` folder
