@@ -9,6 +9,8 @@ import json
 from pathlib import Path
 from typing import Any, Dict, List
 
+from defaults import DEFAULT_GAMES
+
 from .objects import GameType
 
 
@@ -39,7 +41,8 @@ class GameDataLoader:
             GameDataError: If file doesn't exist or can't be parsed
         """
         if not self.games_data_path.exists():
-            raise GameDataError(f"Game data file not found: {self.games_data_path}")
+            with open(self.games_data_path, "w", encoding="utf-8") as f:
+                f.write(DEFAULT_GAMES)
 
         try:
             with open(self.games_data_path, "r", encoding="utf-8") as f:
