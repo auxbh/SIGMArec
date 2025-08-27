@@ -138,7 +138,7 @@ class Container:
 
     def cleanup(self) -> None:
         """Clean up all registered services."""
-        logging.info("[Container] Cleaning up services")
+        logging.info("Cleaning up services")
 
         # Run cleanup or shutdown in reverse order from singleton registration
         for service_name in reversed(list(self._singletons.keys())):

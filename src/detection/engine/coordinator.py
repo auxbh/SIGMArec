@@ -79,9 +79,7 @@ class DetectionCoordinator(IDetectionEngine):
         self.state_manager.update_game(active_game)
         if active_game != previous_game:
             if previous_game and not active_game and self.obs.recording_active:
-                logging.debug(
-                    "[DetectionCoordinator] Game exited while recording, stopping and deleting"
-                )
+                logging.debug("Game exited while recording, stopping and deleting")
                 self.recording_processor.mark_for_deletion()
                 self.recording_processor.stop_recording_immediate(play_failed=True)
 

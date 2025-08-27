@@ -3,12 +3,14 @@ Application configuration handling.
 This module handles loading and managing application settings from src.config.toml.
 """
 
+import logging
 import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Optional
 
 import toml
+
 from src.defaults import DEFAULT_CONFIG
 
 
@@ -487,16 +489,20 @@ class ConfigManager:
             return self._settings
 
         if not self.config_path.exists():
+            logging.debug("[Settings] Config missing, creating default config file")
             self.config_path.parent.mkdir(parents=True, exist_ok=True)
 
             with open(self.config_path, "w", encoding="utf-8") as f:
                 f.write(DEFAULT_CONFIG)
+
+        logging.debug("[Settings] Loading config from '%s'", self.config_path)
 
         try:
             with open(self.config_path, "r", encoding="utf-8") as f:
                 config_data = toml.load(f)
 
             self._settings = self._parse_config_data(config_data)
+            logging.debug("[Settings] Config loaded")
             return self._settings
 
         except Exception as e:
@@ -523,20 +529,6 @@ class ConfigManager:
             raise ConfigurationError(
                 f"Error saving configuration to {self.config_path}: {e}"
             ) from e
-
-    def get_setting(self, key: str, default=None):
-        """Get a specific setting value."""
-        settings = self.load_settings()
-        return getattr(settings, key, default)
-
-    def update_setting(self, key: str, value: Any) -> None:
-        """Update a specific setting and save."""
-        settings = self.load_settings()
-        if hasattr(settings, key):
-            setattr(settings, key, value)
-            self.save_settings(settings)
-        else:
-            raise ValueError(f"Unknown setting: {key}")
 
     def _parse_config_data(self, config_data: Dict[str, Any]) -> AppSettings:
         """Parse and validate configuration data into AppSettings object."""

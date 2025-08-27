@@ -182,7 +182,6 @@ class Application:
             target=self._hotkey_loop, daemon=True, name="HotkeyMonitor"
         )
         self.hotkey_thread.start()
-        logging.debug("[Application] Hotkey monitoring started")
 
     def _hotkey_loop(self) -> None:
         """Hotkey monitoring loop."""

@@ -53,14 +53,14 @@ class RecordingProcessor:
         patterns = set(transition.triggered_patterns)
 
         logging.debug(
-            "[RecordingProcessor] [%s] %s → %s",
+            "[%s] %s → %s",
             transition.game.name,
             transition.from_state,
             transition.to_state,
         )
 
         if "restart" in patterns and self.obs.recording_active:
-            logging.debug("[RecordingProcessor] Play restarted")
+            logging.debug("Play restarted")
             self._delete_next_recording = True
             self._restart_after_stop = True
             self._stop_recording(immediate=True)
@@ -94,7 +94,7 @@ class RecordingProcessor:
         self._delete_next_recording = False
 
         if self._restart_after_stop:
-            logging.debug("[RecordingProcessor] Starting new recording after restart")
+            logging.debug("New recording after restart")
             self._restart_after_stop = False
             self._start_recording(play_sound=True)
 
@@ -118,7 +118,7 @@ class RecordingProcessor:
             delay_remaining = self.scene_processor.get_recording_delay_remaining()
             if delay_remaining > 0:
                 logging.debug(
-                    "[RecordingProcessor] Delaying recording start by %.2fs",
+                    "Delaying recording start by %.2fs",
                     delay_remaining,
                 )
 
@@ -152,7 +152,7 @@ class RecordingProcessor:
         """Stop recording with optional delay and sound feedback."""
         if not immediate:
             logging.debug(
-                "[RecordingProcessor] Waiting %ss before stopping",
+                "Waiting %ss before stopping",
                 self.settings.result_wait,
             )
             time.sleep(self.settings.result_wait)
@@ -167,10 +167,8 @@ class RecordingProcessor:
         if os.path.exists(output_path):
             os.remove(output_path)
             logging.debug(
-                "[RecordingProcessor] Deleted invalid play: '%s'",
+                "Deleted invalid play: '%s'",
                 Path(output_path).name,
             )
         else:
-            logging.warning(
-                "[RecordingProcessor] Recording file not found: %s", output_path
-            )
+            logging.warning("Recording file not found: %s", output_path)
