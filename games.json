@@ -1,0 +1,1340 @@
+{
+  "beatmania IIDX INFINITAS": {
+    "type": "pixel",
+    "processes": [
+      {
+        "exe": "*bm2dx.exe",
+        "title": "beatmania IIDX INFINITAS"
+      }
+    ],
+    "shortname": "IIDXINF",
+    "states": {
+      "Select": {
+        "patterns": [
+          {
+            "description": "Blue line on the left",
+            "resolution": [
+              1920,
+              1080
+            ],
+            "pixels": [
+              [
+                310,
+                125,
+                1,
+                213,
+                255,
+                0
+              ]
+            ]
+          }
+        ]
+      },
+      "Playing": {
+        "patterns": [
+          {
+            "description": "1P",
+            "resolution": [
+              1920,
+              1080
+            ],
+            "pixels": [
+              [
+                339,
+                840,
+                17,
+                17,
+                18,
+                0
+              ],
+              [
+                53,
+                20,
+                155,
+                155,
+                155,
+                0
+              ]
+            ]
+          },
+          {
+            "description": "2P",
+            "resolution": [
+              1920,
+              1080
+            ],
+            "pixels": [
+              [
+                1580,
+                840,
+                17,
+                17,
+                18,
+                0
+              ],
+              [
+                1867,
+                20,
+                155,
+                155,
+                155,
+                0
+              ]
+            ]
+          },
+          {
+            "description": "DP",
+            "resolution": [
+              1920,
+              1080
+            ],
+            "pixels": [
+              [
+                724,
+                840,
+                20,
+                20,
+                20,
+                0
+              ],
+              [
+                438,
+                20,
+                155,
+                155,
+                155,
+                0
+              ],
+              [
+                1196,
+                840,
+                20,
+                20,
+                20,
+                0
+              ],
+              [
+                1482,
+                20,
+                155,
+                155,
+                155,
+                0
+              ]
+            ]
+          }
+        ]
+      },
+      "Result": {
+        "patterns": [
+          {
+            "description": "SP",
+            "resolution": [
+              1920,
+              1080
+            ],
+            "pixels": [
+              [
+                931,
+                1037,
+                204,
+                204,
+                204,
+                0
+              ]
+            ]
+          },
+          {
+            "description": "DP",
+            "resolution": [
+              1920,
+              1080
+            ],
+            "pixels": [
+              [
+                931,
+                1037,
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                942,
+                1060,
+                255,
+                254,
+                254,
+                0
+              ]
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "Sound Voltex: Exceed Gear (Konasute)": {
+    "type": "pixel",
+    "processes": [
+      {
+        "exe": "*sv6c.exe",
+        "title": "SOUND VOLTEX EXCEED GEAR"
+      }
+    ],
+    "shortname": "SDVXEAC",
+    "states": {
+      "Select": {
+        "patterns": [
+          {
+            "description": "Landscape Monitor: Colored text around radar",
+            "resolution": [
+              1920,
+              1080
+            ],
+            "pixels": [
+              [
+                897,
+                350,
+                0,
+                255,
+                242,
+                0
+              ],
+              [
+                922,
+                432,
+                255,
+                0,
+                202,
+                0
+              ]
+            ]
+          },
+          {
+            "description": "Portrait Monitor: Colored text around radar",
+            "resolution": [
+              1080,
+              1920
+            ],
+            "pixels": [
+              [
+                423,
+                620,
+                0,
+                255,
+                242,
+                0
+              ],
+              [
+                466,
+                765,
+                255,
+                0,
+                202,
+                0
+              ]
+            ]
+          },
+          {
+            "description": "Landscape Monitor + Flipped Portrait Game: Colored text around radar",
+            "resolution": [
+              1920,
+              1080
+            ],
+            "pixels": [
+              [
+                1299,
+                423,
+                0,
+                255,
+                242,
+                0
+              ],
+              [
+                1154,
+                466,
+                255,
+                0,
+                202,
+                0
+              ]
+            ]
+          },
+          {
+            "description": "Landscape Monitor + Portrait Game: Colored text around radar",
+            "resolution": [
+              1920,
+              1080
+            ],
+            "pixels": [
+              [
+                620,
+                656,
+                0,
+                255,
+                242,
+                0
+              ],
+              [
+                765,
+                613,
+                255,
+                0,
+                202,
+                0
+              ]
+            ]
+          }
+        ]
+      },
+      "Playing": {
+        "patterns": [
+          {
+            "description": "Landscape Monitor: Frame to the left of song jacket, orange hyphen to the left of song title",
+            "resolution": [
+              1920,
+              1080
+            ],
+            "pixels": [
+              [
+                670,
+                150,
+                225,
+                230,
+                236,
+                0
+              ],
+              [
+                860,
+                152,
+                0,
+                0,
+                0,
+                0
+              ]
+            ]
+          },
+          {
+            "description": "Portrait Monitor: Frame to the left of song jacket, orange hyphen to the left of song title",
+            "resolution": [
+              1080,
+              1920
+            ],
+            "pixels": [
+              [
+                23,
+                254,
+                225,
+                230,
+                236,
+                0
+              ],
+              [
+                360,
+                270,
+                0,
+                0,
+                0,
+                0
+              ]
+            ]
+          },
+          {
+            "description": "Landscape Monitor + Flipped Portrait Game: Frame to the left of song jacket, orange hyphen to the left of song title",
+            "resolution": [
+              1920,
+              1080
+            ],
+            "pixels": [
+              [
+                1665,
+                23,
+                225,
+                230,
+                236,
+                0
+              ],
+              [
+                1649,
+                360,
+                0,
+                0,
+                0,
+                0
+              ]
+            ]
+          },
+          {
+            "description": "Landscape Monitor + Portrait Game: Frame to the left of song jacket, orange hyphen to the left of song title",
+            "resolution": [
+              1920,
+              1080
+            ],
+            "pixels": [
+              [
+                255,
+                1057,
+                225,
+                230,
+                236,
+                0
+              ],
+              [
+                271,
+                720,
+                0,
+                0,
+                0,
+                0
+              ]
+            ]
+          }
+        ]
+      },
+      "Result": {
+        "patterns": [
+          {
+            "description": "Landscape Monitor: Result screen chip/long/tsunami colored text",
+            "resolution": [
+              1920,
+              1080
+            ],
+            "pixels": [
+              [
+                787,
+                687,
+                3,
+                234,
+                255,
+                0
+              ],
+              [
+                848,
+                687,
+                156,
+                255,
+                0,
+                0
+              ],
+              [
+                916,
+                687,
+                255,
+                0,
+                231,
+                0
+              ]
+            ]
+          },
+          {
+            "description": "Portrait Monitor: Result screen chip/long/tsunami colored text",
+            "resolution": [
+              1080,
+              1920
+            ],
+            "pixels": [
+              [
+                232,
+                1220,
+                3,
+                234,
+                255,
+                0
+              ],
+              [
+                342,
+                1220,
+                156,
+                255,
+                0,
+                0
+              ],
+              [
+                463,
+                1220,
+                255,
+                0,
+                231,
+                0
+              ]
+            ]
+          },
+          {
+            "description": "Landscape Monitor + Flipped Portrait Game: Result screen chip/long/tsunami colored text",
+            "resolution": [
+              1920,
+              1080
+            ],
+            "pixels": [
+              [
+                699,
+                232,
+                3,
+                234,
+                255,
+                0
+              ],
+              [
+                699,
+                342,
+                156,
+                255,
+                0,
+                0
+              ],
+              [
+                699,
+                463,
+                255,
+                0,
+                231,
+                0
+              ]
+            ]
+          },
+          {
+            "description": "Landscape Monitor + Portrait Game: Result screen chip/long/tsunami colored text",
+            "resolution": [
+              1920,
+              1080
+            ],
+            "pixels": [
+              [
+                1220,
+                846,
+                3,
+                234,
+                255,
+                0
+              ],
+              [
+                1220,
+                736,
+                156,
+                255,
+                0,
+                0
+              ],
+              [
+                1220,
+                616,
+                255,
+                0,
+                231,
+                0
+              ]
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "beatmania IIDX 31 EPOLIS": {
+    "type": "pixel",
+    "shortname": "IIDX31",
+    "processes": [
+      {
+        "exe": "spice64.exe",
+        "title": "beatmania IIDX 31 EPOLIS main"
+      }
+    ],
+    "states": {
+      "Select": {
+        "patterns": [
+          {
+            "description": "Top left T, bottom of yellow bar on the right",
+            "resolution": [
+              1920,
+              1080
+            ],
+            "pixels": [
+              [
+                473,
+                39,
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                1903,
+                850,
+                225,
+                239,
+                0,
+                0
+              ]
+            ]
+          }
+        ]
+      },
+      "Playing": {
+        "patterns": [
+          {
+            "description": "1P",
+            "resolution": [
+              1920,
+              1080
+            ],
+            "pixels": [
+              [
+                247,
+                982,
+                141,
+                137,
+                131,
+                0
+              ],
+              [
+                257,
+                972,
+                7,
+                6,
+                6,
+                0
+              ],
+              [
+                159,
+                1020,
+                225,
+                239,
+                0,
+                0
+              ]
+            ]
+          },
+          {
+            "description": "2P",
+            "resolution": [
+              1920,
+              1080
+            ],
+            "pixels": [
+              [
+                1673,
+                982,
+                141,
+                137,
+                131,
+                0
+              ],
+              [
+                1662,
+                972,
+                7,
+                6,
+                6,
+                0
+              ],
+              [
+                1793,
+                1020,
+                225,
+                239,
+                0,
+                0
+              ]
+            ]
+          },
+          {
+            "description": "DP",
+            "resolution": [
+              1920,
+              1080
+            ],
+            "pixels": [
+              [
+                606,
+                990,
+                219,
+                239,
+                0,
+                0
+              ],
+              [
+                783,
+                974,
+                219,
+                239,
+                0,
+                0
+              ],
+              [
+                787,
+                967,
+                142,
+                138,
+                132,
+                0
+              ],
+              [
+                1313,
+                990,
+                219,
+                239,
+                0,
+                0
+              ],
+              [
+                1136,
+                974,
+                219,
+                239,
+                0,
+                0
+              ],
+              [
+                1132,
+                967,
+                142,
+                138,
+                132,
+                0
+              ]
+            ]
+          }
+        ]
+      },
+      "Result": {
+        "patterns": [
+          {
+            "description": "SP",
+            "resolution": [
+              1920,
+              1080
+            ],
+            "pixels": [
+              [
+                931,
+                1037,
+                191,
+                191,
+                191,
+                0
+              ]
+            ]
+          },
+          {
+            "description": "DP",
+            "resolution": [
+              1920,
+              1080
+            ],
+            "pixels": [
+              [
+                931,
+                1037,
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                942,
+                1060,
+                239,
+                238,
+                238,
+                0
+              ]
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "beatmania IIDX 32 Pinky Crush": {
+    "type": "pixel",
+    "shortname": "IIDX32",
+    "processes": [
+      {
+        "exe": "spice64.exe",
+        "title": "beatmania IIDX 32 Pinky Crush main"
+      }
+    ],
+    "states": {
+      "Select": {
+        "patterns": [
+          {
+            "description": "Top left pink M, bottom of pink bar on the right",
+            "resolution": [
+              1920,
+              1080
+            ],
+            "pixels": [
+              [
+                107,
+                47,
+                239,
+                0,
+                186,
+                0
+              ],
+              [
+                1912,
+                862,
+                239,
+                0,
+                186,
+                0
+              ]
+            ]
+          }
+        ]
+      },
+      "Playing": {
+        "patterns": [
+          {
+            "description": "1P",
+            "resolution": [
+              1920,
+              1080
+            ],
+            "pixels": [
+              [
+                9,
+                948,
+                239,
+                190,
+                229,
+                0
+              ],
+              [
+                531,
+                948,
+                239,
+                190,
+                229,
+                0
+              ],
+              [
+                271,
+                880,
+                193,
+                192,
+                192,
+                0
+              ]
+            ]
+          },
+          {
+            "description": "2P",
+            "resolution": [
+              1920,
+              1080
+            ],
+            "pixels": [
+              [
+                1388,
+                948,
+                239,
+                190,
+                229,
+                0
+              ],
+              [
+                1910,
+                948,
+                239,
+                190,
+                229,
+                0
+              ],
+              [
+                1648,
+                880,
+                193,
+                192,
+                192,
+                0
+              ]
+            ]
+          },
+          {
+            "description": "DP",
+            "resolution": [
+              1920,
+              1080
+            ],
+            "pixels": [
+              [
+                378,
+                908,
+                239,
+                52,
+                231,
+                0
+              ],
+              [
+                690,
+                980,
+                239,
+                52,
+                239,
+                0
+              ],
+              [
+                1541,
+                908,
+                239,
+                52,
+                231,
+                0
+              ],
+              [
+                1227,
+                980,
+                239,
+                52,
+                239,
+                0
+              ]
+            ]
+          }
+        ]
+      },
+      "Result": {
+        "patterns": [
+          {
+            "description": "SP",
+            "resolution": [
+              1920,
+              1080
+            ],
+            "pixels": [
+              [
+                931,
+                1037,
+                191,
+                191,
+                191,
+                0
+              ]
+            ]
+          },
+          {
+            "description": "DP",
+            "resolution": [
+              1920,
+              1080
+            ],
+            "pixels": [
+              [
+                931,
+                1037,
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                942,
+                1060,
+                239,
+                238,
+                238,
+                0
+              ]
+            ]
+          }
+        ]
+      }
+    }
+  },
+
+  "Dance Dance Revolution A3 (Gold Cab mode)": {
+    "type": "pixel",
+    "processes": [
+      {
+        "exe": "spice.exe",
+        "title": "Dance Dance Revolution"
+      },
+      {
+        "exe": "spice64.exe",
+        "title": "Dance Dance Revolution"
+      }
+    ],
+    "shortname": "DDRA3Gold",
+    "states": {
+      "Select": {
+        "patterns": [
+          {
+            "description": "Description",
+            "resolution": [
+              1280,
+              720
+            ],
+            "pixels": [
+              [
+                912,
+                186,
+                239,
+                203,
+                74,
+                0,
+                0
+              ]
+            ]
+          }
+        ]
+      },
+      "Playing": {
+        "patterns": [
+          {
+            "description": "Description",
+            "resolution": [
+              1280,
+              720
+            ],
+            "pixels": [
+              [
+                639,
+                66,
+                224,
+                196,
+                31,
+                0,
+                0
+              ]
+            ]
+          }
+        ]
+      },
+      "Result": {
+        "patterns": [
+          {
+            "description": "P1",
+            "resolution": [
+              1280,
+              720
+            ],
+            "pixels": [
+              [
+                90,
+                106,
+                239,
+                215,
+                49, 
+                0,
+                0
+              ],
+              [
+                696,
+                336,
+                8,
+                146,
+                222,
+                0,
+                0
+              ]
+            ]
+          },
+          {
+            "description": "P2",
+            "resolution": [
+              1280,
+              720
+            ],
+            "pixels": [
+              [
+                1209,
+                106,
+                239,
+                215,
+                49,
+                0,
+                0
+              ],
+              [
+                696,
+                336,
+                8,
+                146,
+                222,
+                0,
+                0
+              ]
+            ]
+          }
+        ]
+      }
+    }
+  },
+
+  "Dance Dance Revolution WORLD": {
+    "type": "pixel",
+    "processes": [
+      {
+        "exe": "spice.exe",
+        "title": "Dance Dance Revolution"
+      },
+      {
+        "exe": "spice64.exe",
+        "title": "Dance Dance Revolution"
+      }
+    ],
+    "shortname": "DDRWORLD",
+    "states": {
+      "Select": {
+        "patterns": [
+          {
+            "description": "P1",
+            "resolution": [
+              1280,
+              720
+            ],
+            "pixels": [
+              [
+                1017,
+                19,
+                239,
+                215,
+                49,
+                0
+              ],
+              [
+                358,
+                364,
+                39,
+                40,
+                40,
+                0
+              ]
+            ]
+          },
+          {
+            "description": "P2",
+            "resolution": [
+              1280,
+              720
+            ],
+            "pixels": [
+              [
+                1017,
+                19,
+                239,
+                215,
+                49,
+                0
+              ],
+              [
+                1256,
+                364,
+                39,
+                40,
+                40,
+                0
+              ]
+            ]
+          }
+        ]
+      },
+      "Playing": {
+        "patterns": [
+          {
+            "description": "Top text",
+            "resolution": [
+              1280,
+              720
+            ],
+            "pixels": [
+              [
+                681,
+                10,
+                67,
+                63,
+                63,
+                0
+              ]
+            ]
+          }
+        ]
+      },
+      "Result": {
+        "patterns": [
+          {
+            "description": "Result text",
+            "resolution": [
+              1280,
+              720
+            ],
+            "pixels": [
+              [
+                338,
+                463,
+                0,
+                255,
+                186,
+                0
+              ],
+              [
+                742,
+                360,
+                114,
+                114,
+                114,
+                0
+              ]
+            ]
+          }
+        ]
+      }
+    }
+  },
+
+  "Sound Voltex: Exceed Gear": {
+    "type": "pixel",
+    "processes": [
+      {
+        "exe": "spice64.exe",
+        "title": "SOUND VOLTEX EXCEED GEAR - Main Screen"
+      }
+    ],
+    "shortname": "SDVXEG",
+    "states": {
+      "Select": {
+        "patterns": [
+          {
+            "description": "Portrait Monitor:Colored text around radar",
+            "resolution": [
+              1080,
+              1920
+            ],
+            "pixels": [
+              [
+                423,
+                620,
+                0,
+                255,
+                242,
+                0
+              ],
+              [
+                466,
+                765,
+                255,
+                0,
+                202,
+                0
+              ]
+            ]
+          }
+        ]
+      },
+      "Playing": {
+        "patterns": [
+          {
+            "description": "Portrait Monitor: Frame to the left of song jacket, orange hyphen to the left of song title",
+            "resolution": [
+              1080,
+              1920
+            ],
+            "pixels": [
+              [
+                23,
+                254,
+                225,
+                230,
+                236,
+                0
+              ],
+              [
+                360,
+                270,
+                0,
+                0,
+                0,
+                0
+              ]
+            ]
+          }
+        ]
+      },
+      "Result": {
+        "patterns": [
+          {
+            "description": "Portrait Monitor: Result screen chip/long/tsunami colored text",
+            "resolution": [
+              1080,
+              1920
+            ],
+            "pixels": [
+              [
+                232,
+                1220,
+                0,
+                231,
+                247,
+                0
+              ],
+              [
+                342,
+                1220,
+                156,
+                251,
+                0,
+                0
+              ],
+              [
+                463,
+                1220,
+                247,
+                0,
+                222,
+                0
+              ]
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "beatoraja / lr2oraja": {
+    "type": "log",
+    "processes": [
+      {
+        "exe": "java.exe"
+      }
+    ],
+    "shortname": "BMS",
+    "logs": "beatoraja_log.xml",
+    "states": {
+      "Select": {
+        "patterns": [
+          {
+            "class": "bms.player.beatoraja.SystemSoundManager",
+            "method": "shuffle"
+          },
+          {
+            "class": "bms.player.beatoraja.MainController$SystemSoundManager",
+            "method": "shuffle"
+          }
+        ]
+      },
+      "Playing": {
+        "patterns": [
+          {
+            "class": "bms.player.beatoraja.play.BMSPlayer",
+            "method": "create"
+          }
+        ]
+      },
+      "Result": {
+        "patterns": [
+          {
+            "class": "bms.player.beatoraja.result.MusicResult",
+            "method": "lambda$prepare$0"
+          }
+        ]
+      },
+      "Unknown": {
+        "patterns": [
+          {
+            "class": "bms.player.beatoraja.PlayDataAccessor",
+            "method": "writeScoreData"
+          }
+        ]
+      }
+    }
+  }
+}

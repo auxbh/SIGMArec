@@ -22,7 +22,7 @@ class ValidationError(ConfigurationError):
 class ConfigValidator:
     """Handles validation and type conversion of configuration values."""
 
-    VALID_GAMES = {"IIDXINF", "SDVXEAC", "IIDX31", "IIDX32", "SDVXEG", "BMS"}
+    VALID_GAMES = {"IIDXINF", "SDVXEAC", "IIDX31", "IIDX32", "SDVXEG", "BMS", "DDRA3Gold", "DDRWORLD"}
     VALID_STATES = {"Select", "Playing", "Result", "Default"}
     VALID_VIDEO_KEYS = {"Base", "Output", "FPS"}
     KEY_PATTERN = re.compile(
