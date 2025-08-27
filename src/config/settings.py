@@ -412,13 +412,14 @@ class AppSettings:
             if "Default" in self.scenes[game]:
                 return self.scenes[game]["Default"]
 
-        # [scenes.Default.STATE]
-        if state in self.scenes["Default"]:
-            return self.scenes["Default"][state]
-
-        # [scenes.Default.Default]
-        if "Default" in self.scenes["Default"]:
-            return self.scenes["Default"]["Default"]
+        # [scenes.STATE]
+        if "Default" in self.scenes:
+            # [scenes.Default.STATE]
+            if state in self.scenes["Default"]:
+                return self.scenes["Default"][state]
+            # [scenes.Default.Default]
+            if "Default" in self.scenes["Default"]:
+                return self.scenes["Default"]["Default"]
 
         return None
 
