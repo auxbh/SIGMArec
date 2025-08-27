@@ -347,7 +347,6 @@
       }
     }
   },
-
   "Dance Dance Revolution A3 (Gold Cab mode)": {
     "type": "pixel",
     "processes": [
@@ -406,7 +405,6 @@
       }
     }
   },
-
   "Dance Dance Revolution WORLD": {
     "type": "pixel",
     "processes": [
@@ -466,7 +464,6 @@
       }
     }
   },
-
   "Sound Voltex: Exceed Gear": {
     "type": "pixel",
     "processes": [
