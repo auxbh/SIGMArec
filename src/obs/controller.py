@@ -357,16 +357,8 @@ class OBSController(IOBSController):
             self._connection_lost = True
             return None
 
-    def get_game_video_settings(self, game: str) -> Optional[OBSVideoSettings]:
-        """
-        Get video settings for a specific game with fallback to defaults.
-
-        Args:
-            game: Game shortname (e.g., 'IIDX31', 'BMS')
-
-        Returns:
-            OBSVideoSettings object if configuration exists, None otherwise
-        """
+    def get_game_video_settings(self, game: str = "") -> Optional["OBSVideoSettings"]:
+        """Get video settings for a specific game with fallback to defaults."""
 
         def parse_resolution(res_str: str) -> tuple[int, int] or None:
             """Parse resolution string like '1920x1080' into (width, height)."""
@@ -382,15 +374,15 @@ class OBSController(IOBSController):
             except (ValueError, TypeError):
                 return None
 
-        def parse_fps(fps_str: str) -> tuple[int, int] or None:
+        def parse_fps(fps_str: str) -> int or None:
             """Parse FPS string like '60' or '59.94' into (numerator, denominator)."""
             if not fps_str:
                 return None
             try:
                 fps_value = float(fps_str)
-                if fps_value <= 0:
+                if fps_value <= 0 or fps_value > 240:
                     return None
-                return (int(fps_value), 1)
+                return fps_value
             except (ValueError, TypeError):
                 return None
 
@@ -403,22 +395,14 @@ class OBSController(IOBSController):
         if not combined_settings:
             return None
 
-        base_res = parse_resolution(combined_settings.get("Base", None))
-        output_res = parse_resolution(combined_settings.get("Output", None))
-        fps_numerator, fps_denominator = parse_fps(combined_settings.get("FPS", None))
-
-        obssettings = OBSVideoSettings(
-            base_width=base_res[0],
-            base_height=base_res[1],
-            output_width=output_res[0],
-            output_height=output_res[1],
-            fps_numerator=fps_numerator,
-            fps_denominator=fps_denominator,
+        return OBSVideoSettings(
+            base_width=parse_resolution(combined_settings.get("Base", None))[0],
+            base_height=parse_resolution(combined_settings.get("Base", None))[1],
+            output_width=parse_resolution(combined_settings.get("Output", None))[0],
+            output_height=parse_resolution(combined_settings.get("Output", None))[1],
+            fps_numerator=parse_fps(combined_settings.get("FPS", None)),
+            fps_denominator=1,
         )
-
-        logging.debug("[OBS] Game video settings: %s", obssettings)
-
-        return obssettings
 
     def set_current_scene(self, scene_name: str):
         """
