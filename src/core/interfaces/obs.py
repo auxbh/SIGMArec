@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, List, Optional
 
 if TYPE_CHECKING:
-    from src.obs import OBSVideoSettings
+    from src.obs.videosettings import OBSVideoSettings
 
 
 class IOBSEventHandler(ABC):
