@@ -27,16 +27,16 @@ class VideoProcessor:
         Args:
             game: New focused game or None if no game focused
         """
-        if game is None:
-            return None
-
-        game_video_settings = self.obs.get_game_video_settings(game.shortname)
-        if game_video_settings is None:
-            return None
-
         current_video_settings = self.obs.get_video_settings()
         if current_video_settings is None:
             return None
+
+        shortname = ""
+        if game is not None:
+            shortname = game.shortname
+        game_video_settings = (
+            self.obs.get_game_video_settings(shortname) or current_video_settings
+        )
 
         if game_video_settings != current_video_settings:
             self.obs.set_video_settings(game_video_settings)
