@@ -13,9 +13,13 @@ from src.games import Game, PixelGame
 class PixelStateDetector(BaseStateDetector):
     """Detector for pixel-based game state detection."""
 
-    def __init__(self, detection_threshold: int = 2):
+    def __init__(
+        self,
+        detection_threshold: int = 2,
+        screen_capture_service: ScreenCaptureService = None,
+    ):
         super().__init__(detection_threshold)
-        self.screen = ScreenCaptureService()
+        self.screen = screen_capture_service
 
     def can_handle_game(self, game: Game) -> bool:
         """Check if this detector can handle pixel-based games."""

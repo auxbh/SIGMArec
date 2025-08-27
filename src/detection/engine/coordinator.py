@@ -33,6 +33,7 @@ class DetectionCoordinator(IDetectionEngine):
         recording_manager: IRecordingManager,
         games: List[Game],
         settings: AppSettings,
+        game_detector: GameDetector,
         video_processor: VideoProcessor,
         scene_processor: SceneProcessor,
         recording_processor: RecordingProcessor,
@@ -45,6 +46,7 @@ class DetectionCoordinator(IDetectionEngine):
             recording_manager: Recording manager interface
             games: List of games to detect
             settings: Application settings
+            game_detector: Game detector
             scene_processor: Scene processor
             recording_processor: Recording processor
         """
@@ -53,7 +55,7 @@ class DetectionCoordinator(IDetectionEngine):
         self.settings = settings
 
         self.state_manager = StateManager()
-        self.game_detector = GameDetector(games)
+        self.game_detector = game_detector
         self.pixel_detector = PixelStateDetector(settings.detections_required)
         self.log_detector = LogStateDetector(settings.detections_required)
         self.video_processor = video_processor

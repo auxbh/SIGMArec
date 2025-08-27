@@ -26,20 +26,21 @@ class RecordingManager(IRecordingManager):
     def __init__(
         self,
         settings: AppSettings,
-        obs_recording_dir: Optional[str] = None,
-        sound_service: SoundService = None,
+        sound_service: SoundService,
+        screen: ScreenCaptureService,
     ):
         """
         Initialize the recording manager.
 
         Args:
             settings: Application settings
-            obs_recording_dir: Directory where OBS saves recordings (optional)
             sound_service: Sound service for playing sounds
+            screen: Screen capture service for creating thumbnails
+            obs: OBS controller
         """
         self.settings = settings
-        self.obs_recording_dir = Path(obs_recording_dir) if obs_recording_dir else None
         self.sound_service = sound_service
+        self.screen = screen
         self._current_lastplay_path: Optional[Path] = None
         self._current_thumbnail_path: Optional[Path] = None
 
@@ -202,8 +203,6 @@ class RecordingManager(IRecordingManager):
         """
         if self._current_lastplay_path:
             base_dir = self._current_lastplay_path.parent
-        elif self.obs_recording_dir and self.obs_recording_dir.exists():
-            base_dir = self.obs_recording_dir
         else:
             base_dir = Path(".")
 
@@ -240,9 +239,7 @@ class RecordingManager(IRecordingManager):
         Args:
             video_path: Path to the lastplay video file
         """
-        screen_capture = ScreenCaptureService()
-
-        screenshot = screen_capture.capture_focused_window()
+        screenshot = self.screen.capture_focused_window()
 
         recording_dir = video_path.parent
         thumbnail_path = recording_dir / "lastplay.png"

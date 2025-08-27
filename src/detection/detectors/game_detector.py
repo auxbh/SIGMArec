@@ -17,7 +17,11 @@ from src.games import Game, LogGame, PixelGame, ProcessInfo
 class GameDetector(IGameDetector):
     """Detects which game is currently active/focused."""
 
-    def __init__(self, games: List[Game]):
+    def __init__(
+        self,
+        games: List[Game],
+        screen_capture_service: ScreenCaptureService,
+    ):
         """
         Initialize game detector.
 
@@ -25,7 +29,7 @@ class GameDetector(IGameDetector):
             games: List of games to detect
         """
         self.games = games
-        self.screen = ScreenCaptureService()
+        self.screen = screen_capture_service
         self.logs = LogService()
 
     def get_active_game(self) -> Optional[Game]:

@@ -97,19 +97,35 @@ class Container:
         sound_service = SoundService(settings)
         self.register_singleton("SoundService", sound_service)
 
-        # Step 4: Initialize recording manager
-        from src.obs import RecordingManager
+        # Step 4: Initialize screen capture service
+        from src.detection.screen_capture import ScreenCaptureService
 
-        recording_manager = RecordingManager(settings, sound_service=sound_service)
-        self.register_singleton("IRecordingManager", recording_manager)
+        screen_capture_service = ScreenCaptureService()
+        self.register_singleton("ScreenCaptureService", screen_capture_service)
 
-        # Step 5: Initialize OBS controller
+        # Step 5: Initialize game detector
+        from src.detection.detectors.game_detector import GameDetector
+
+        game_detector = GameDetector(games, screen_capture_service)
+        self.register_singleton("GameDetector", game_detector)
+
+        # Step 6: Initialize OBS controller
         from src.obs import OBSController
 
         obs_controller = OBSController.connect(settings)
         self.register_singleton("IOBSController", obs_controller)
 
-        # Step 6: Initialize processors
+        # Step 7: Initialize recording manager
+        from src.obs import RecordingManager
+
+        recording_manager = RecordingManager(
+            settings=settings,
+            sound_service=sound_service,
+            screen=screen_capture_service,
+        )
+        self.register_singleton("IRecordingManager", recording_manager)
+
+        # Step 8: Initialize processors
         from src.detection.processors.video_processor import VideoProcessor
 
         video_processor = VideoProcessor(obs_controller, settings)
@@ -121,12 +137,13 @@ class Container:
         )
         self.register_singleton("RecordingProcessor", recording_processor)
 
-        # Step 7: Initialize detection engine
+        # Step 9: Initialize detection engine
         detection_engine = DetectionCoordinator(
             obs_controller=obs_controller,
             recording_manager=recording_manager,
             games=games,
             settings=settings,
+            game_detector=game_detector,
             video_processor=video_processor,
             scene_processor=scene_processor,
             recording_processor=recording_processor,
