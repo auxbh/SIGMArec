@@ -36,7 +36,9 @@ class SceneProcessor:
 
         game_shortname = transition.game.shortname
         current_scene = self.obs.get_current_scene()
-        scene_name = self.settings.get_scene_name(game_shortname, transition.to_state)
+        scene_name = self.settings.get_scene_name(
+            state=transition.to_state, game=game_shortname
+        )
 
         if scene_name:
             if current_scene != scene_name:
