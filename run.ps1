@@ -8,7 +8,7 @@ if ($sigmarecProcess) {
     } else {
         Write-Host "Stopping SIGMArec..." -ForegroundColor Yellow
         Stop-Process -Name "SIGMArec" -Force
-        Start-Sleep -Seconds 2
+        Start-Sleep -Seconds 1
     }
 }
 
@@ -25,13 +25,13 @@ foreach ($process in $pythonProcesses) {
             } else {
                 Write-Host "Stopping SIGMArec..." -ForegroundColor Yellow
                 Stop-Process -Id $process.Id -Force
+                Start-Sleep -Seconds 1
             }
         }
     } catch {
         # Ignore errors when checking command line (process might have already exited)
     }
 }
-Start-Sleep -Seconds 1
 
 # Check if we're in a built release directory
 if (Test-Path "src/__main__.py") {
