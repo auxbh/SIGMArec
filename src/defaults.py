@@ -449,6 +449,7 @@ DEFAULT_GAMES = """{
     }
   }
 }
+
 """
 
 DEFAULT_CONFIG = """[input]
@@ -537,4 +538,5 @@ scene_change_delay = 0.3 # Delay in seconds before recording can start after sce
 #   FPS = 120
 #
 # Note: Game-specific settings override defaults. Unspecified settings preserve existing OBS values.
+
 """
