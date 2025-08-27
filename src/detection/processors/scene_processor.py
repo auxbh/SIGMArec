@@ -2,7 +2,6 @@
 Handles OBS scene switching based on game states.
 """
 
-import logging
 import time
 
 from src.core.interfaces.obs import IOBSController
